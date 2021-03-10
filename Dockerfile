@@ -8,6 +8,8 @@ RUN apk --no-cache --update add bash nano \
     php7-session \
     php7-pdo \
     php7-tokenizer \
+    php7-xmlwriter \
+    php7-pdo_mysql \
     composer
 
 ADD ./nginx-supervisor.ini /etc/supervisor/conf.d/nginx-supervisor.ini
