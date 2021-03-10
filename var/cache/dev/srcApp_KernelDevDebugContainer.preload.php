@@ -10,12 +10,13 @@ if (in_array(PHP_SAPI, ['cli', 'phpdbg'], true)) {
 }
 
 require dirname(__DIR__, 3).'/vendor/autoload.php';
-require __DIR__.'/ContainerHxpz0tZ/srcApp_KernelDevDebugContainer.php';
+require __DIR__.'/ContainerK4gkvxA/srcApp_KernelDevDebugContainer.php';
 
 $classes = [];
 $classes[] = 'Symfony\Bundle\FrameworkBundle\FrameworkBundle';
 $classes[] = 'Doctrine\Bundle\DoctrineBundle\DoctrineBundle';
 $classes[] = 'Doctrine\Bundle\MigrationsBundle\DoctrineMigrationsBundle';
+$classes[] = 'Symfony\Bundle\MakerBundle\MakerBundle';
 $classes[] = 'Symfony\Bundle\FrameworkBundle\Controller\ControllerNameParser';
 $classes[] = 'Symfony\Bundle\FrameworkBundle\EventListener\ResolveControllerNameSubscriber';
 $classes[] = 'Symfony\Component\DependencyInjection\ServiceLocator';
@@ -149,6 +150,41 @@ $classes[] = 'Symfony\Component\HttpKernel\ControllerMetadata\ArgumentMetadataFa
 $classes[] = 'App\Kernel';
 $classes[] = 'Symfony\Component\HttpKernel\EventListener\LocaleListener';
 $classes[] = 'Symfony\Component\HttpKernel\Log\Logger';
+$classes[] = 'Symfony\Bundle\MakerBundle\Command\MakerCommand';
+$classes[] = 'Symfony\Bundle\MakerBundle\Maker\MakeAuthenticator';
+$classes[] = 'Symfony\Bundle\MakerBundle\Maker\MakeCommand';
+$classes[] = 'Symfony\Bundle\MakerBundle\Maker\MakeController';
+$classes[] = 'Symfony\Bundle\MakerBundle\Maker\MakeCrud';
+$classes[] = 'Symfony\Bundle\MakerBundle\Maker\MakeDockerDatabase';
+$classes[] = 'Symfony\Bundle\MakerBundle\Maker\MakeEntity';
+$classes[] = 'Symfony\Bundle\MakerBundle\Maker\MakeFixtures';
+$classes[] = 'Symfony\Bundle\MakerBundle\Maker\MakeForm';
+$classes[] = 'Symfony\Bundle\MakerBundle\Maker\MakeMessage';
+$classes[] = 'Symfony\Bundle\MakerBundle\Maker\MakeMessengerMiddleware';
+$classes[] = 'Symfony\Bundle\MakerBundle\Maker\MakeMigration';
+$classes[] = 'Symfony\Bundle\MakerBundle\Maker\MakeRegistrationForm';
+$classes[] = 'Symfony\Bundle\MakerBundle\Maker\MakeResetPassword';
+$classes[] = 'Symfony\Bundle\MakerBundle\Maker\MakeSerializerEncoder';
+$classes[] = 'Symfony\Bundle\MakerBundle\Maker\MakeSerializerNormalizer';
+$classes[] = 'Symfony\Bundle\MakerBundle\Maker\MakeSubscriber';
+$classes[] = 'Symfony\Bundle\MakerBundle\EventRegistry';
+$classes[] = 'Symfony\Bundle\MakerBundle\Maker\MakeTest';
+$classes[] = 'Symfony\Bundle\MakerBundle\Maker\MakeTwigExtension';
+$classes[] = 'Symfony\Bundle\MakerBundle\Maker\MakeUser';
+$classes[] = 'Symfony\Bundle\MakerBundle\Security\UserClassBuilder';
+$classes[] = 'Symfony\Bundle\MakerBundle\Maker\MakeValidator';
+$classes[] = 'Symfony\Bundle\MakerBundle\Maker\MakeVoter';
+$classes[] = 'Symfony\Bundle\MakerBundle\Event\ConsoleErrorSubscriber';
+$classes[] = 'Symfony\Bundle\MakerBundle\Doctrine\DoctrineHelper';
+$classes[] = 'Symfony\Bundle\MakerBundle\Doctrine\EntityClassGenerator';
+$classes[] = 'Symfony\Bundle\MakerBundle\FileManager';
+$classes[] = 'Symfony\Bundle\MakerBundle\Util\AutoloaderUtil';
+$classes[] = 'Symfony\Bundle\MakerBundle\Util\ComposerAutoloaderFinder';
+$classes[] = 'Symfony\Bundle\MakerBundle\Util\MakerFileLinkFormatter';
+$classes[] = 'Symfony\Bundle\MakerBundle\Generator';
+$classes[] = 'Symfony\Bundle\MakerBundle\Util\PhpCompatUtil';
+$classes[] = 'Symfony\Bundle\MakerBundle\Renderer\FormTypeRenderer';
+$classes[] = 'Symfony\Bundle\MakerBundle\Security\SecurityConfigUpdater';
 $classes[] = 'Symfony\Component\HttpFoundation\RequestStack';
 $classes[] = 'Symfony\Component\HttpKernel\EventListener\ResponseListener';
 $classes[] = 'Symfony\Bundle\FrameworkBundle\Routing\Router';
