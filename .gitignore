@@ -7,4 +7,6 @@
 /public/bundles/
 /var/
 /vendor/
+.env
+/data
 ###< symfony/framework-bundle ###
