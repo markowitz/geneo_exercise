@@ -10,6 +10,8 @@ RUN apk --no-cache --update add bash nano \
     php7-tokenizer \
     php7-xmlwriter \
     php7-pdo_mysql \
+    php7-simplexml \
+    php7-fileinfo \
     composer
 
 ADD ./nginx-supervisor.ini /etc/supervisor/conf.d/nginx-supervisor.ini
@@ -17,3 +19,7 @@ ADD ./nginx-supervisor.ini /etc/supervisor/conf.d/nginx-supervisor.ini
 COPY nginx.conf /etc/nginx/nginx.conf
 
 WORKDIR /var/www
+
+COPY ./composer.* /var/www/
+
+RUN composer install
