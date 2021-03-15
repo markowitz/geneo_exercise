@@ -77,9 +77,37 @@ class User implements UserInterface
      */
     private $updated_at;
 
+     /**
+     * @ORM\ManyToMany(targetEntity="App\Entity\User" ,mappedBy="following")
+
+     */
+    private $followers;
+
+    /**
+     * @ORM\ManyToMany(targetEntity="App\Entity\User" , inversedBy="followers")
+     * @ORM\JoinTable(name="following",
+     *       joinColumns={
+     *                   @ORM\JoinColumn(name="user_id",referencedColumnName="id")
+     *            },
+     *        inverseJoinColumns={
+     *                   @ORM\JoinColumn(name="following_id",referencedColumnName="id")
+     *         }
+     * )
+     */
+    private $following;
+
+    /**
+     * @ORM\OneToMany(targetEntity=PostComment::class, mappedBy="user", orphanRemoval=true)
+     */
+    private $postComments;
+
+    const ADMIN = 'ROLE_ADMIN';
+    const ROLE_USER  = 'ROLE_USER';
+
     public function __construct()
     {
         $this->posts = new ArrayCollection();
+        $this->postComments = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -228,4 +256,115 @@ class User implements UserInterface
 
         return $this;
     }
+
+     /**
+     * Get the value of followers
+     *  @return Collection
+     */
+    public function getFollowers()
+    {
+        return $this->followers;
+    }
+
+    /**
+     * Set the value of followers
+     *
+     * @return  self
+     */
+    public function setFollowers($followers)
+    {
+        $this->followers = $followers;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection
+     * Get joinColumns={
+     */
+    public function getFollowing()
+    {
+        return $this->following;
+    }
+
+    /**
+     * Set joinColumns={
+     *
+     * @return  self
+     */
+    public function setFollowing($following)
+    {
+        $this->following = $following;
+
+        return $this;
+    }
+
+    public function addFollower(User $follower): self
+    {
+        if (!$this->followers->contains($follower)) {
+            $this->followers[] = $follower;
+            $follower->addFollowing($this);
+        }
+
+        return $this;
+    }
+
+    public function removeFollower(User $follower): self
+    {
+        if ($this->followers->contains($follower)) {
+            $this->followers->removeElement($follower);
+            $follower->removeFollowing($this);
+        }
+
+        return $this;
+    }
+
+    public function addFollowing(User $following): self
+    {
+        if (!$this->following->contains($following)) {
+            $this->following[] = $following;
+        }
+
+        return $this;
+    }
+
+    public function removeFollowing(User $following): self
+    {
+        if ($this->following->contains($following)) {
+            $this->following->removeElement($following);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|PostComment[]
+     */
+    public function getPostComments(): Collection
+    {
+        return $this->postComments;
+    }
+
+    public function addPostComment(PostComment $postComment): self
+    {
+        if (!$this->postComments->contains($postComment)) {
+            $this->postComments[] = $postComment;
+            $postComment->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removePostComment(PostComment $postComment): self
+    {
+        if ($this->postComments->removeElement($postComment)) {
+            // set the owning side to null (unless already changed)
+            if ($postComment->getUser() === $this) {
+                $postComment->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
 }

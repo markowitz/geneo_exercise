@@ -66,9 +66,26 @@ class Post
      */
     private $images;
 
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private $is_published = 0;
+
+    /**
+     * @ORM\OneToMany(targetEntity=PostComment::class, mappedBy="post", orphanRemoval=true)
+     */
+    private $postComments;
+
+    /**
+     * @ORM\ManyToMany(targetEntity=Tag::class, mappedBy="post")
+     */
+    private $tags;
+
     public function __construct()
     {
         $this->images = new ArrayCollection();
+        $this->postComments = new ArrayCollection();
+        $this->tags = new ArrayCollection();
     }
 
 
@@ -174,6 +191,75 @@ class Post
             if ($image->getPost() === $this) {
                 $image->setPost(null);
             }
+        }
+
+        return $this;
+    }
+
+    public function getIsPublished(): ?bool
+    {
+        return $this->is_published;
+    }
+
+    public function setIsPublished(bool $is_published): self
+    {
+        $this->is_published = $is_published;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|PostComment[]
+     */
+    public function getPostComments(): Collection
+    {
+        return $this->postComments;
+    }
+
+    public function addPostComment(PostComment $postComment): self
+    {
+        if (!$this->postComments->contains($postComment)) {
+            $this->postComments[] = $postComment;
+            $postComment->setPost($this);
+        }
+
+        return $this;
+    }
+
+    public function removePostComment(PostComment $postComment): self
+    {
+        if ($this->postComments->removeElement($postComment)) {
+            // set the owning side to null (unless already changed)
+            if ($postComment->getPost() === $this) {
+                $postComment->setPost(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Tag[]
+     */
+    public function getTags(): Collection
+    {
+        return $this->tags;
+    }
+
+    public function addTag(Tag $tag): self
+    {
+        if (!$this->tags->contains($tag)) {
+            $this->tags[] = $tag;
+            $tag->addPost($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTag(Tag $tag): self
+    {
+        if ($this->tags->removeElement($tag)) {
+            $tag->removePost($this);
         }
 
         return $this;

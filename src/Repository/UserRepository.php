@@ -59,10 +59,17 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         ));
 
         $user->setRoles(
-            count($dto->roles) ? $dto->roles : ['ROLE_USER']
+            count($dto->roles) ? $dto->roles : User::ROLE_USER
         );
 
         $this->_em->persist($user);
+        $this->_em->flush();
+    }
+
+    public function addFollowing(Object $authUser, Object $user)
+    {
+        $authUser->addFollowing($user);
+
         $this->_em->flush();
     }
 

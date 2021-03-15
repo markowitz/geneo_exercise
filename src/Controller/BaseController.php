@@ -2,15 +2,17 @@
 
 namespace App\Controller;
 
+use Exception;
+use App\Dto\PostRequest;
 use App\Services\RequestService;
 use App\Controller\Traits\ControllersTrait;
-use App\Services\UploaderService;
+use Symfony\Component\HttpFoundation\{Request, Response};
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Response;
-
-class BaseController extends AbstractController
+abstract class BaseController extends AbstractController
 {
+
+    use ControllersTrait;
 
      /**
      * @var RequestService
@@ -28,58 +30,93 @@ class BaseController extends AbstractController
         $this->validator = $validator;
     }
 
-      /**
-     * Transform $request Body
+    public function createOrUpdateForPosts(Request $request, $post = null)
+    {
+        $request = $this->transformJsonBody($request);
+        $dto = $this->requestService->mapContent($request, PostRequest::class);
+        $imageDtos = $this->imageDtos($request);
+
+        $errors =   $this->validator->validate($dto);
+
+        if (count($errors)) {
+            $this->unlinkImages($imageDtos);
+
+            return $this->json([
+                    'message' =>  'Validation Error',
+                    'errors' => $this->validationErrorResponse($errors)
+                ], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+
+        try {
+
+            $post = $post ? $this->updatePost($post, $dto, $imageDtos) : $this->createPost($dto, $imageDtos);
+
+        } catch(Exception $e) {
+
+            $this->unlinkImages($imageDtos);
+
+            return $this->json([
+                'message' => 'an error occurred while trying to register',
+                'errors' => $e->getMessage()
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        $post = $this->postTransformer->transformFromObject($post);
+
+        return $this->json([
+            'message' => 'post created successfully',
+            'data' => $post
+        ], Response::HTTP_CREATED);
+    }
+
+    /**
      * @param Request $request
-     * @return
+     * @return Array $imageDtos
      */
-    public function transformJsonBody($request)
+    protected function imageDtos($request)
     {
-        if ($request->getContentType() == 'json') {
+        $imageDtos = [];
 
-            $data = json_decode($request->getContent(), true);
+        if ($request->get('images') || $request->files->count() > 0) {
 
-            $request->request->replace($data);
+            $request = $request->get('images') ?? $request->files->all()['images'];
+
+            $imageDtos = $this->requestService->mapRequestToFiles(
+                            $request,
+                            ImageRequest::class
+                        );
+
         }
 
-        return $request;
+        return $imageDtos;
     }
 
     /**
-     * @param Symfony\Component\Validator\ConstraintViolationList $errors
-     * @return array $errorRepsponse
-     */
-    public function validationErrorResponse($errors)
-    {
-
-        $errorResponse = [];
-
-        foreach ($errors as $error) {
-
-            $errorTitle = str_replace(['[', ']'], '', $error->getPropertyPath());
-            $errorResponse[$errorTitle] = $error->getMessage();
-
-        }
-        return $errorResponse;
-    }
-
-    public function response(array $data, $status = Response::HTTP_OK)
-    {
-        return $this->json($data, $status);
-    }
-
-    /**
+     * create post repository
+     * @param Post $post
      * @param array $imageDtos
+     * @return Post $post
      */
-    public function unlinkImages($imageDtos)
+    protected function createPost($dto, $imageDtos)
     {
-        if (count($imageDtos)) {
+        return $this->postRepo->create($dto, $this->getUser(), $imageDtos);
+    }
 
-            array_walk($imageDtos, function($imageDto) {
-                unlink('uploads/images/'.$imageDto->file_name);
-            });
+    /**
+     * update post repository
+     * @param Post $post
+     * @param [type] $dto
+     * @param array $imageDtos
+     * @return Post $post
+     */
+    protected function updatePost($post, $dto, $imageDtos)
+    {
+        return $this->postRepo->update($post, $dto, $this->getUser(), $imageDtos);
+    }
 
-        }
+    public function serviceRequest($request, $className)
+    {
+        return $this->requestService->mapContent($request, $className);
     }
 
 }

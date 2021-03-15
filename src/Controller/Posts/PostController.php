@@ -4,29 +4,39 @@ namespace App\Controller\Posts;
 
 use App\Controller\BaseController;
 use App\Controller\Traits\ControllersTrait;
+use App\Dto\ApprovalRequest;
 use App\Dto\ImageRequest;
 use App\Dto\PostRequest;
 use App\Dto\Transformer\PostTransformer;
+use App\Entity\Post;
+use App\Entity\User;
+use App\Exceptions\HttpException;
 use App\Repository\PostRepository;
 use App\Services\RequestService;
 use Exception;
+use OCI_Lob;
+use phpDocumentor\Reflection\Types\Parent_;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Component\Validator\Constraints as Assert;
+use Throwable;
+use Webmozart\Assert\Assert as AssertAssert;
 
 class PostController extends BaseController
 {
     /**
      * @var PostRepo
      */
-    private $postRepo;
+    public $postRepo;
 
     /**
      * @var PostTransformer
      */
-    private $postTransformer;
+    public $postTransformer;
 
     public function __construct(RequestService $requestService, ValidatorInterface $validator, PostRepository $postRepo, PostTransformer $postTransformer)
     {
@@ -41,30 +51,90 @@ class PostController extends BaseController
      */
     public function create(Request $request)
     {
+        return parent::createOrUpdateForPosts($request);
+    }
+
+    /**
+     * @Route("/api/posts", name="api_posts", methods={"GET"})
+     */
+    public function fetch()
+    {
+        $user = $this->getUser();
+        $posts = $this->postRepo->fetch($user);
+        $posts = $this->postTransformer->transformFromObjects($posts);
+
+        return $this->json([
+            'data' => $posts
+        ], Response::HTTP_OK);
+
+    }
+
+
+    /**
+     * @Route("/api/post/{slug}", name="fetch_post", methods={"GET"})
+     */
+    public function show(String $slug)
+    {
+
+        try {
+
+            $post = $this->postRepo->findOneBy(['slug' => $slug]);
+
+        } catch(Throwable $e) {
+
+            throw $this->createNotFoundException('page not found');
+        }
+
+        $this->denyAccessUnlessGranted('view', $post);
+
+        $post = $this->postTransformer->transformFromObject($post);
+
+        return $this->json([
+            'data' => $post
+        ], Response::HTTP_OK);
+
+    }
+
+
+      /**
+     * @Route("/api/posts/pending", name="pending_posts", methods={"GET"})
+     */
+    public function fetchPendingPosts()
+    {
+        $this->denyAccessUnlessGranted(User::ADMIN);
+        $posts = $this->postRepo->fetchPendingPosts();
+        $posts = $this->postTransformer->transformFromObjects($posts);
+
+        return $this->json([
+            'data' => $posts
+        ], Response::HTTP_OK);
+    }
+
+    /**
+     * @Route("/api/post/{id}/approval", name="pending_posts", methods={"POST"})
+     */
+    public function approval(Request $request, Post $post)
+    {
+
+        $this->denyAccessUnlessGranted(User::ADMIN);
+
+        try {
+
+            $post = $this->postRepo->findOneBy(['slug' => $post->getSlug()]);
+
+        } catch(Throwable $e) {
+
+            throw $this->createNotFoundException('page not found');
+        }
 
         $request = $this->transformJsonBody($request);
 
-        $dto = $this->requestService->mapContent($request, PostRequest::class);
-
-        $imageDtos = [];
-
-        if ($request->get('images') || $request->files->count() > 0) {
-
-            $request = $request->get('images') ?? $request->files->all()['images'];
-
-            $imageDtos = $this->requestService->mapRequestToFiles(
-                            $request,
-                            ImageRequest::class
-                        );
-
-        }
+        $dto = $this->requestService->mapContent($request, ApprovalRequest::class);
 
         $errors = $this->validator->validate($dto);
 
         if (count($errors)) {
-            $this->unlinkImages($imageDtos);
-
-            return $this->response([
+            return $this->json([
                     'message' =>  'Validation Error',
                     'errors' => $this->validationErrorResponse($errors)
                 ], Response::HTTP_UNPROCESSABLE_ENTITY);
@@ -72,49 +142,29 @@ class PostController extends BaseController
 
         try {
 
-            $post = $this->postRepo->create($dto, $this->getUser(), $imageDtos);
+            $this->postRepo->approval($post, $dto->approved);
 
         } catch(Exception $e) {
-
-            $this->unlinkImages($imageDtos);
-
-            return $this->response([
-                'message' => 'an error occurred while trying to register',
-                'errors' => $e->getMessage()
-            ], Response::HTTP_BAD_REQUEST);
+            throw new HttpException($e->getMessage());
         }
 
-        $post = $this->postTransformer->transformFromObject($post);
-
-        return $this->response([
-            'message' => 'post created successfully',
-            'data' => $post
-        ], Response::HTTP_CREATED);
-
+        return $this->json([
+            'message' => "post approved successfully"
+        ], Response::HTTP_OK);
     }
 
     /**
-     * @Route("/api/post/{slug}", name="fetch_post", methods={"GET"})
+     * @Route("/api/post/{id}/edit", name="edit_post", methods={"POST"})
      */
-    public function fetch($slug)
+    public function edit(Post $post, Request $request)
     {
+        $this->denyAccessUnlessGranted('edit', $post);
 
-        $post = $this->postRepo->findOneBy([
-            'slug' => $slug
-        ]);
-
-        if (!$post) {
-            return $this->response([
-                'message' => "post doesn't exist"
-            ], Response::HTTP_NOT_FOUND);
-        }
-
-        $post = $this->postTransformer->transformFromObject($post);
-
-        return $this->response([
-            'data' => $post
-        ], Response::HTTP_OK);
+        return parent::createOrUpdateForPosts($request, $post);
     }
+
+
+
 }
 
 

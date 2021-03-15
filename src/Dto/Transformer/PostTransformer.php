@@ -11,21 +11,25 @@ class PostTransformer extends AbstractTransformer
     /**
      * @param Post $post
      *
-     * @return OrderResponseDto
+     * @return PostRequest
      */
     public function transformFromObject($post)
     {
         $dto = new PostRequest();
-        $userTransformer = new UserTransformer();
-        $imageTransformer = new ImageTransformer();
 
-        $dto->title = $post->getTitle();
-        $dto->content = $post->getContent();
-        $dto->author = $userTransformer->transformFromObject($post->getAuthor());
-        $dto->images = $imageTransformer->transformFromObject($post->getImages());
+        $userTransformer    = new UserTransformer();
+        $imageTransformer   = new ImageTransformer();
+        $tagTransformer     = new TagTransformer();
+
+        $dto->title     = $post->getTitle();
+        $dto->content   = $post->getContent();
+        $dto->author    = $userTransformer->transformFromObject($post->getAuthor());
+        $dto->images    = $imageTransformer->transformFromObject($post->getImages());
+        $dto->tags      = $tagTransformer->transformFromObjects($post->getTags());
         $dto->createdAt = $post->getCreatedAt();
         $dto->updatedAt = $post->getUpdatedAt();
 
         return $dto;
     }
+
 }
