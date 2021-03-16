@@ -35,12 +35,14 @@
   - POST ```/api/login_check``` to login 
   - POST ```/api/register``` to create a new user
   - POST ```/api/refresh/token``` to refresh login token
-      - example ```curl --location --request POST '0.0.0.0:43219/api/token/refresh' \
+      - example 
+            ```
+                  curl --location --request POST '0.0.0.0:43219/api/token/refresh' \
                     --header 'Content-Type: application/json' \
                     --data-raw '{
-                    "refresh_token":                "d05e93f712f57831c897b3ac1a1c2b31067bd7e8d818decc050a8dc4edfd7745021d83e690ecf3b0ed0741e6e99441149dd1d3d5ea086fb3f85a42e9c0c97981"
+                    "refresh_token":                    "d05e93f712f57831c897b3ac1a1c2b31067bd7e8d818decc050a8dc4edfd7745021d83e690ecf3b0ed0741e6e99441149dd1d3d5ea086fb3f85a42e9c0c97981"
                       }'
-```
+              ```
   - POST ```/api/post``` to create post
   - GET ```/api/admin/pending-posts``` to fetch pending posts
   - POST ```/api/admin/post/{id}/approval``` to approve 
