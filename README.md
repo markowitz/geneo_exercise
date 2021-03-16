@@ -87,3 +87,34 @@
               "approved": "omo"
           }'
           ```
+
+  - DELETE ```/api/post/{id}``` to delete post
+    
+        ```
+          curl --location --request DELETE '0.0.0.0:43219/api/post/16' \
+              --header 'Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpYXQiOjE2MTU4NDk0ODUsImV4cCI6MTYxNTg1MzA4NSwicm9sZXMiOlsiUk9MRV9VU0VSIl0sInVzZXJuYW1lIjoiaWNud2FrYW5tYSsxMkBnbWFpbC5jb20ifQ.d2Y13qEr_sQ3ID3xBTYnM4-xhIjO9LoCWrahiStf5cMPma0jnzUna-IvboLeIt0DHgHC70J1Pz6QT1cGWrnDQm9h_FiIP3ep47VIsA1UIa4md0TxyfkyPA6zIl01oEuJ_oz0E_-mr1jrKr54ycsxyQlZid0AmAdDmJT2APuua2xYRkQWkr9ugQnURsJp2vimDsd5NJXQxqeOzalPCE-8HzDva9jlRBQz0SVmJ0JtPS3OZJOpJOWW-8Z7pLGkm1SVfAxXTnzQgVjcK1bF454HZ5lvfHStZaDhtDc54ukZzykooL3aL34RduAAcpWZfi0XtAcGkCmVtM45yO_wHPPOYg'
+    
+        ```
+
+  - POST ```api/post/{id}/edit``` to edit post
+  
+      ``` 
+          curl --location --request POST '0.0.0.0:43219/api/post/19/edit' \
+            --header 'Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpYXQiOjE2MTU4MTg4ODAsImV4cCI6MTYxNTgyMjQ4MCwicm9sZXMiOlsiUk9MRV9VU0VSIl0sInVzZXJuYW1lIjoiaWNud2FrYW5tYSsxM0BnbWFpbC5jb20ifQ.gyBDmCyxU3s6fIWjEyYD0l04FQoM6bmN_ukyd1T7x9p4pDNfblqOlx1P5FiUcE_kav2CEaHjgXnfC8UDLeJD43xawfgdm2i_WxdaT9am3tpmSZHjebk-FmO7un0DkIX7xLcIY7NhOeDoVp5k3NExCoFmJ2tZhz9IIHFvRVGRSToWpeM5PIeTjmvPRrlqDCyLJK1EMAB4O6lM63PIDMXrhT_DhgQ6LinpCqBWIpgrG6EBjEYZSVMD_vX1NyjgaTlpg82wegx4wa5o9ib1RKuVaLX9YM0Dkejzj5mQRxmo1GTj4OwVLYEwC9sIh2SavWwXywh3s__gUIXVkCknTKQRcg' \
+            --header 'Content-Type: application/json' \
+            --data-raw '{
+                "title": "yes we can",
+                "content": "Well this is a new test"
+            }'
+            
+       ```
+       
+   - GET ```/api/post/{slug}``` show single post
+   - POST ```/api/post/{post}/comment ``` post comment
+   - POST ```/api/following/{id} ``` endpoint to follow user
+   - GET ```/api/user/posts ``` show users posts
+   - DELETE ```/api/admin/user/{user}``` delete user
+   - POST ```/api/admin/post/{id}/approval ``` approve post
+  
+
+ 
