@@ -35,6 +35,7 @@
   - POST ```/api/login_check``` to login
         
        *example
+       
             ```
               curl --location --request POST '0.0.0.0:43219/api/login_check' \
                 --header 'Content-Type: application/json' \
@@ -46,6 +47,7 @@
   - POST ```/api/register``` to create a new user
       
       *example 
+      
             ```
             curl --location --request POST '0.0.0.0:43219/api/register' \
             --header 'Content-Type: application/json' \
@@ -57,9 +59,10 @@
             ```
   - POST ```/api/refresh/token``` to refresh login token
         
-       *example 
+       *example
+       
             ```
-                  curl --location --request POST '0.0.0.0:43219/api/token/refresh' \
+                 curl --location --request POST '0.0.0.0:43219/api/token/refresh' \
                     --header 'Content-Type: application/json' \
                     --data-raw '{
                     "refresh_token":                    "d05e93f712f57831c897b3ac1a1c2b31067bd7e8d818decc050a8dc4edfd7745021d83e690ecf3b0ed0741e6e99441149dd1d3d5ea086fb3f85a42e9c0c97981"
@@ -68,6 +71,7 @@
   - POST ```/api/post``` to create post
   
       *example 
+      
           ```
             curl --location --request POST '0.0.0.0:43219/api/post' \
               --header 'Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpYXQiOjE2MTU5MzM0OTQsImV4cCI6MTYxNTkzNzA5NCwicm9sZXMiOlsiUk9MRV9VU0VSIl0sInVzZXJuYW1lIjoiam9obkBhYmMuY29tIn0.CpTFWbqr4ECJFxpWLoz4GIbon_MjEIkFQq0RP9ic1Vyvx5qo-ZC9r-8ijcSVEjiTzgpTZ6HSpiaO0Wbhmvb89mK2wHEe5aNlBabAdBnwj0WcyoaYDRx5rdQFV4_T1hjKcYdwnwAzSxnFN3K4X6bjiNwqLWEtv3qcdQM-zTf9ApVS9Kh6amNWbwEQ31GBPngI_PmLQ4CWTBj_UvIVi2nLlkwIi13bKmS-k4zLNm60ujyd-sTed5wAxNgTlissJm6IJ9JG8n8cplQA75bAZpqcgS003VfnfbGgkycWJlqwTAqV3LKwfzO2N03gcbgVkYMYedL14lxcffRoYGPU1UvD1Q' \
@@ -77,6 +81,7 @@
                   "content": "Nam efficitur mauris non mauris imperdiet, at faucibus erat rhoncus. Maecenas iaculis vehicula odio, id dapibus libero pellentesque at. Nunc quis mauris nec urna pretium placerat at ut nulla. Etiam eget interdum sem. Pellentesque volutpat iaculis ipsum eget tempor. Etiam tincidunt libero nec bibendum efficitur. Nulla nec urna nunc. In consequat dictum aliquam. Curabitur elit mi, sollicitudin eget condimentum at, elementum sed dui. Maecenas mollis ipsum eu sapien facilisis auctor. Maecenas nec viverra lorem. Cras dictum, enim ut bibendum rhoncus, ipsum odio efficitur dolor, rhoncus euismod nulla lacus eu enim. Etiam facilisis viverra ultricies. Aliquam erat volutpat. Etiam maximus dignissim metus, vitae porta lacus rhoncus at.",
                   "tags": "lagos, nigeria"
               }'
+              
               ```
   - GET ```/api/admin/pending-posts``` to fetch pending posts
   - POST ```/api/admin/post/{id}/approval``` to approve 
