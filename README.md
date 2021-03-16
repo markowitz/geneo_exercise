@@ -33,8 +33,6 @@
 ## Routes
 
   - POST ```/api/login_check``` to login
-        
-       *example
        
             ```
               curl --location --request POST '0.0.0.0:43219/api/login_check' \
@@ -44,9 +42,7 @@
                     "password": "testing@12"
                 }'
               ```
-  - POST ```/api/register``` to create a new user
-      
-      *example 
+  - POST ```/api/register``` to create a new user 
       
             ```
             curl --location --request POST '0.0.0.0:43219/api/register' \
@@ -69,8 +65,6 @@
                       }'
               ```
   - POST ```/api/post``` to create post
-  
-      *example 
       
           ```
             curl --location --request POST '0.0.0.0:43219/api/post' \
@@ -85,8 +79,6 @@
               ```
   - GET ```/api/admin/pending-posts``` to fetch pending posts
   - POST ```/api/admin/post/{id}/approval``` to approve 
-
-      *example
       
       ```
         curl --location --request POST '0.0.0.0:43219/api/post/19/approval' \
