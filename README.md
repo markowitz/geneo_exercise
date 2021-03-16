@@ -19,12 +19,28 @@
   
   - Clone repo
   - The app is dockerized. To start, ensue you have docker on your system, you can check how to install docker <a href="https://docs.docker.com/get-docker/">here</a> 
-  - SET up your copy .env.example to .env and edit your database information 
+  - copy .env.example to .env and edit your database information
   - run ```docker-compose up -d``` to build the docker image.
   - bash into the docker container ```docker exec -it geneo.app bash```
   - run ```php bin/console doctrine:migrations:migrate``` to run migration and add ```--env=test``` flag for test migration
+  - if you have issues with migrating the env test, run ```php bin/console doctrine:database:create --env=test```
   - ```php bin/console doctrine:fixtures:load``` to load data fixtures add the test env flag to load for test db
   - an admin account is setup already with detail
   - email: admin@geneo.com
   - password: password
   - to run tests ```php bin/phpunit```
+
+## Routes
+
+  - POST ```/api/login_check``` to login 
+  - POST ```/api/register``` to create a new user
+  - POST ```/api/refresh/token``` to refresh login token
+      - example ```curl --location --request POST '0.0.0.0:43219/api/token/refresh' \
+                  ```--header 'Content-Type: application/json' \
+                  ```--data-raw '{
+                  ```"refresh_token":             "d05e93f712f57831c897b3ac1a1c2b31067bd7e8d818decc050a8dc4edfd7745021d83e690ecf3b0ed0741e6e99441149dd1d3d5ea086fb3f85a42e9c0c97981"
+``}'```
+  - POST ```/api/post``` to create post
+  - GET ```/api/admin/pending-posts``` to fetch pending posts
+  - POST ```/api/admin/post/{id}/approval``` to approve 
+  - 
