@@ -54,8 +54,7 @@
             }'
             ```
   - POST ```/api/refresh/token``` to refresh login token
-        
-       *example
+       
        
             ```
                  curl --location --request POST '0.0.0.0:43219/api/token/refresh' \
