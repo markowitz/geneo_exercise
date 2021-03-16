@@ -58,7 +58,6 @@ class PostController extends BaseController
 
     }
 
-
     /**
      * @Route("/api/post/{slug}", name="fetch_post", methods={"GET"})
      */
@@ -84,20 +83,6 @@ class PostController extends BaseController
 
     }
 
-
-      /**
-     * @Route("/api/posts/pending", name="pending_posts", methods={"GET"})
-     */
-    public function fetchPendingPosts()
-    {
-        $this->denyAccessUnlessGranted(User::ADMIN);
-        $posts = $this->postRepo->fetchPendingPosts();
-        $posts = $this->postTransformer->transformFromObjects($posts);
-
-        return $this->json([
-            'data' => $posts
-        ], Response::HTTP_OK);
-    }
 
     /**
      * @Route("/api/post/{id}/approval", name="pending_posts", methods={"POST"})
@@ -169,6 +154,21 @@ class PostController extends BaseController
 
         return $this->json(null, Response::HTTP_NO_CONTENT);
     }
+
+    /**
+     * @Route("/api/posts/pending", name="pending_posts", methods={"GET"})
+     */
+    public function fetchAllPendingPosts()
+    {
+        $this->denyAccessUnlessGranted(User::ADMIN);
+        $posts = $this->postRepo->fetchAllPendingPosts();
+        $posts = $this->postTransformer->transformFromObjects($posts);
+
+        return $this->json([
+            'data' => $posts
+        ], Response::HTTP_OK);
+    }
+
 
 }
 

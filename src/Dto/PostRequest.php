@@ -32,6 +32,8 @@ class PostRequest
      */
     public $tags;
 
+    public $slug;
+
     public $is_published;
 
     public $createdAt;

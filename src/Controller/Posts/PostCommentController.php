@@ -6,11 +6,11 @@ use App\Entity\Post;
 use App\Controller\BaseController;
 use App\Dto\PostCommentRequest;
 use App\Dto\Transformer\PostCommentTransformer;
-use App\Exceptions\HttpException;
 use App\Repository\PostCommentRepository;
 use App\Services\RequestService;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 

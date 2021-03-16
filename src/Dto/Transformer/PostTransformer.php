@@ -27,6 +27,7 @@ class PostTransformer extends AbstractTransformer
         $dto->author       = $userTransformer->transformFromObject($post->getAuthor());
         $dto->images       = $imageTransformer->transformFromObject($post->getImages());
         $dto->tags         = $tagTransformer->transformFromObjects($post->getTags());
+        $dto->slug         = $post->getSlug();
         $dto->is_published = $post->getIsPublished();
         $dto->createdAt    = $post->getCreatedAt();
         $dto->updatedAt    = $post->getUpdatedAt();

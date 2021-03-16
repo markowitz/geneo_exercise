@@ -275,9 +275,9 @@ class PostTest extends BaseTestBundle
     }
 
     /**
-     * test to fetchApproved posts for auth user and followings
+     * test to show approved posts for auth user and followings
      */
-    public function testFetchApproved()
+    public function testToShowApprovedPosts()
     {
         $headers = $this->authorize();
 
@@ -303,6 +303,334 @@ class PostTest extends BaseTestBundle
 
         $this->assertCount(1, $response['data']);
 
+    }
+
+     /**
+     * test to fetchApproved posts for auth user and followings
+     */
+    public function testUserCannotSeeListOfPostsUnlessPublished()
+    {
+        $headers = $this->authorize();
+
+        $post = $this->postWithImageAndTagsApproved($headers);
+
+        $repo = $this->entityManager->getRepository(Post::class);
+
+        $postRepo = $repo->findOneBy(['id' => $post['data']['id']]);
+
+        $this->entityManager->persist($postRepo);
+        $this->entityManager->flush();
+
+        $this->client->request('GET', 'posts',
+        [],
+        [],
+        $headers);
+
+        $response = json_decode($this->client->getResponse()->getContent(), true);
+
+        $this->assertResponseStatusCodeSame(200);
+
+        $this->assertCount(0, $response['data']);
+
+    }
+
+    /**
+     * users can see posts of users they follow
+     */
+    public function testUserCanSeePostsOfUsersTheyFollow()
+    {
+        $data = [
+            'name' => 'John Doe',
+            'email' => 'johndoe@gmail.com',
+            'password' => '$argon2id$v=19$m=65536,t=4,p=1$eTBDS3FZaURtcFJhbDNKbA$k60/BHW65f2Xg8x8yPFyEUXcnwnSkZc8A4UXv39KZU4'
+        ];
+
+        $user = $this->register($data);
+
+        $userFollow = $this->authorize();
+
+        $this->client->request('POST', "following/{$user->getId()}",
+                [],
+                [],
+                $userFollow
+        );
+
+
+        $postAuthor = $this->authorize($data);
+
+        $post = $this->postWithImageAndTagsApproved($postAuthor);
+
+        $repo = $this->entityManager->getRepository(Post::class);
+
+        $postRepo = $repo->findOneBy(['id' => $post['data']['id']]);
+
+        $postRepo->setIsPublished(1);
+
+        $this->entityManager->persist($postRepo);
+        $this->entityManager->flush();
+
+        $this->client->request('GET', 'posts',
+        [],
+        [],
+        $userFollow);
+
+        $response = json_decode($this->client->getResponse()->getContent(), true);
+
+        $this->assertResponseStatusCodeSame(200);
+
+        $this->assertCount(1, $response['data']);
+
+    }
+
+
+    public function testAuthorCanViewSinglePublishedPost()
+    {
+        $header = $this->authorize();
+
+        $post = $this->postWithImageAndTagsApproved($header);
+
+        $repo = $this->entityManager->getRepository(Post::class);
+
+        $postRepo = $repo->findOneBy(['id' => $post['data']['id']]);
+
+        $postRepo->setIsPublished(1);
+
+        $this->entityManager->persist($postRepo);
+        $this->entityManager->flush();
+
+        $this->client->request('GET', "post/{$postRepo->getSlug()}",
+        [],
+        [],
+        $header);
+
+        $response = json_decode($this->client->getResponse()->getContent(), true);
+
+        $this->assertResponseStatusCodeSame(200);
+
+        $this->assertArrayHasKey("title", $response['data']);
+
+    }
+
+    public function testAuthorCanViewSingleUnpublishedPost()
+    {
+        $header = $this->authorize();
+
+        $post = $this->postWithImageAndTagsApproved($header);
+
+        $repo = $this->entityManager->getRepository(Post::class);
+
+        $postRepo = $repo->findOneBy(['id' => $post['data']['id']]);
+
+        $this->entityManager->persist($postRepo);
+        $this->entityManager->flush();
+
+        $this->client->request('GET', "post/{$postRepo->getSlug()}",
+        [],
+        [],
+        $header);
+
+        $response = json_decode($this->client->getResponse()->getContent(), true);
+
+        $this->assertResponseStatusCodeSame(200);
+
+        $this->assertArrayHasKey("title", $response['data']);
+    }
+
+    public function testUserCannotViewSingleUnpublishedPostIfNotAuthor()
+    {
+        $data = [
+            'name' => 'John Doe',
+            'email' => 'johndoe@gmail.com',
+            'password' => '$argon2id$v=19$m=65536,t=4,p=1$eTBDS3FZaURtcFJhbDNKbA$k60/BHW65f2Xg8x8yPFyEUXcnwnSkZc8A4UXv39KZU4'
+        ];
+
+        $postAuthor = $this->authorize($data);
+
+        $post = $this->postWithImageAndTagsApproved($postAuthor);
+
+        $repo = $this->entityManager->getRepository(Post::class);
+
+        $postRepo = $repo->findOneBy(['id' => $post['data']['id']]);
+
+        $this->entityManager->persist($postRepo);
+        $this->entityManager->flush();
+
+        $authUser = $this->authorize();
+
+        $this->client->request('GET', "post/{$postRepo->getSlug()}",
+        [],
+        [],
+        $authUser);
+
+        $response = json_decode($this->client->getResponse()->getContent(), true);
+
+        $this->assertResponseStatusCodeSame(403);
+    }
+
+    public function testUserCannotViewSinglePublishedPostIfNotFollowingAuthor()
+    {
+        $data = [
+            'name' => 'John Doe',
+            'email' => 'johndoe@gmail.com',
+            'password' => '$argon2id$v=19$m=65536,t=4,p=1$eTBDS3FZaURtcFJhbDNKbA$k60/BHW65f2Xg8x8yPFyEUXcnwnSkZc8A4UXv39KZU4'
+        ];
+
+        $postAuthor = $this->authorize($data);
+
+        $post = $this->postWithImageAndTagsApproved($postAuthor);
+
+        $repo = $this->entityManager->getRepository(Post::class);
+
+        $postRepo = $repo->findOneBy(['id' => $post['data']['id']]);
+
+        $postRepo->setIsPublished(1);
+
+        $this->entityManager->persist($postRepo);
+        $this->entityManager->flush();
+
+        $authUser = $this->authorize();
+
+        $this->client->request('GET', "post/{$postRepo->getSlug()}",
+        [],
+        [],
+        $authUser);
+
+        $response = json_decode($this->client->getResponse()->getContent(), true);
+
+        $this->assertResponseStatusCodeSame(403);
+    }
+
+    public function testUserCanViewSinglePublishedPostOfUsersTheyFollow()
+    {
+        $data = [
+            'name' => 'John Doe',
+            'email' => 'johndoe@gmail.com',
+            'password' => '$argon2id$v=19$m=65536,t=4,p=1$eTBDS3FZaURtcFJhbDNKbA$k60/BHW65f2Xg8x8yPFyEUXcnwnSkZc8A4UXv39KZU4'
+        ];
+
+        $user = $this->register($data);
+
+        $userFollow = $this->authorize();
+
+        $this->client->request('POST', "following/{$user->getId()}",
+                [],
+                [],
+                $userFollow
+        );
+
+        $postAuthor = $this->authorize($data);
+
+        $post = $this->postWithImageAndTagsApproved($postAuthor);
+
+        $repo = $this->entityManager->getRepository(Post::class);
+
+        $postRepo = $repo->findOneBy(['id' => $post['data']['id']]);
+
+        $postRepo->setIsPublished(1);
+
+        $this->entityManager->persist($postRepo);
+        $this->entityManager->flush();
+
+        $this->client->request('GET', "post/{$postRepo->getSlug()}",
+        [],
+        [],
+        $userFollow);
+
+        $response = json_decode($this->client->getResponse()->getContent(), true);
+
+        $this->assertResponseStatusCodeSame(200);
+
+        $this->assertArrayHasKey("title", $response['data']);
+    }
+
+    public function testAdminCanFetchAllPendingPosts()
+    {
+        $data = [
+            'name' => 'John Doe',
+            'email' => 'johndoe@gmail.com',
+            'password' => '$argon2id$v=19$m=65536,t=4,p=1$eTBDS3FZaURtcFJhbDNKbA$k60/BHW65f2Xg8x8yPFyEUXcnwnSkZc8A4UXv39KZU4',
+            'roles' => ['ROLE_ADMIN']
+        ];
+
+
+        $admin = $this->authorize($data);
+
+        $user = $this->authorize();
+
+        $this->postWithImageAndTagsApproved($user);
+
+        $this->client->request('GET', '/api/posts/pending',
+        [],
+        [],
+        $admin);
+
+        $response = json_decode($this->client->getResponse()->getContent(), true);
+        $this->assertResponseStatusCodeSame(200);
+
+        $this->assertGreaterThan(0, $response['data']);
+    }
+
+    public function testAuthorCanDeletePost()
+    {
+        $header = $this->authorize();
+
+        $post = $this->postWithImageAndTagsApproved($header);
+
+        $this->client->request("DELETE", "post/{$post['data']['id']}",
+        [],
+        [],
+        $header);
+
+        $this->assertResponseStatusCodeSame(204);
+    }
+
+    public function testUserCannotDeletePostIfNotOwner()
+    {
+        $data = [
+            'name' => 'John Doe',
+            'email' => 'johndoe@gmail.com',
+            'password' => '$argon2id$v=19$m=65536,t=4,p=1$eTBDS3FZaURtcFJhbDNKbA$k60/BHW65f2Xg8x8yPFyEUXcnwnSkZc8A4UXv39KZU4'
+        ];
+
+        $user = $this->register($data);
+
+        $authUser = $this->authorize();
+
+        $postAuthor = $this->authorize($data);
+
+        $post = $this->postWithImageAndTagsApproved($postAuthor);
+
+        $this->client->request('DELETE', "post/{$post['data']['id']}",
+        [],
+        [],
+        $authUser);
+
+        $this->assertResponseStatusCodeSame(403);
+
+    }
+
+    public function testAdminCanDeletePost()
+    {
+        $data = [
+            'name' => 'John Doe',
+            'email' => 'johndoe@gmail.com',
+            'password' => '$argon2id$v=19$m=65536,t=4,p=1$eTBDS3FZaURtcFJhbDNKbA$k60/BHW65f2Xg8x8yPFyEUXcnwnSkZc8A4UXv39KZU4',
+            'roles' => ['ROLE_ADMIN']
+        ];
+
+
+        $admin = $this->authorize($data);
+
+        $user = $this->authorize();
+
+        $post = $this->postWithImageAndTagsApproved($user);
+
+        $this->client->request('DELETE', "post/{$post['data']['id']}",
+        [],
+        [],
+        $admin);
+
+        $this->assertResponseStatusCodeSame(204);
     }
 
 }

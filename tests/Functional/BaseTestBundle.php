@@ -32,13 +32,14 @@ class BaseTestBundle extends WebTestCase
         $name = isset($data['name']) ? $data['name'] : 'Jane Doe';
         $email = isset($data['email']) ? $data['email'] : 'jane@gmail.com';
         $password = isset($data['password']) ? $data['password'] : '$argon2id$v=19$m=65536,t=4,p=1$eTBDS3FZaURtcFJhbDNKbA$k60/BHW65f2Xg8x8yPFyEUXcnwnSkZc8A4UXv39KZU4';
+        $roles = isset($data['roles']) ? $data['roles'] : ['ROLE_USER'];
 
         $user->setName($name);
         $user->setEmail($email);
         $user->setPassword($password);
+        $user->setRoles($roles);
 
         $entityManager = $this->entityManager;
-
         $entityManager->persist($user);
         $entityManager->flush();
 
@@ -46,12 +47,21 @@ class BaseTestBundle extends WebTestCase
 
     }
 
-    protected function authorize()
+    protected function authorize($data = [])
     {
-        $this->register();
+        $repo = $this->entityManager->getRepository(User::class);
+
+        $email = isset($data['email']) ? $data['email'] : '';
+
+        $postRepo = $repo->findOneBy(['email' => $email]);
+
+        if(!$postRepo) {
+           $postRepo = $this->register($data);
+        }
+
 
         $user = [
-                "email" => "jane@gmail.com",
+                "email" => $postRepo->getEmail(),
                 "password" => 'geneotest'
         ];
 
@@ -86,7 +96,7 @@ class BaseTestBundle extends WebTestCase
         ];
 
 
-        $this->client->request('POST', 'post',
+        $this->client->request('POST', '/api/post',
             [],
             [],
             $headers,
