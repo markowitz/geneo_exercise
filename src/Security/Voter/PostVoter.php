@@ -13,7 +13,7 @@ class PostVoter extends Voter
 {
     const VIEW = 'view';
     const EDIT = 'edit';
-    const CREATE = 'create';
+    const DELETE = 'delete';
 
     /**
      * @var Security
@@ -27,7 +27,7 @@ class PostVoter extends Voter
 
     protected function supports($attribute, $subject)
     {
-        return in_array($attribute, [self::VIEW, self::EDIT, self::CREATE])
+        return in_array($attribute, [self::VIEW, self::EDIT, self::DELETE])
             && $subject instanceof Post;
     }
 
@@ -51,8 +51,8 @@ class PostVoter extends Voter
             case self::VIEW:
                 return $this->canView($subject, $user);
 
-            case self::CREATE:
-                return $this->canCreate($subject, $user);
+            case self::DELETE:
+                return $this->canDelete($subject, $user);
         }
 
         return false;
@@ -72,12 +72,9 @@ class PostVoter extends Voter
         return $user === $post->getAuthor() && !$post->getIsPublished();
     }
 
-    protected function canCreate(Post $post, User $user)
+    protected function canDelete(Post $post, User $user)
     {
-        return ($user === $post->getAuthor() && $post->getIsPublished()) ||
-                ($user->getFollowing()->contains($post->getAuthor())
-                && $post->getIsPublished());
-
-
+        return $user === $post->getAuthor();
     }
+
 }

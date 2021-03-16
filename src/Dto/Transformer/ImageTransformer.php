@@ -14,19 +14,16 @@ class ImageTransformer extends AbstractTransformer
     {
         $dtoImages = [];
 
-        if ($images) {
+        if (count($images)) {
             foreach($images as $image) {
                 $dto = new ImageRequest();
                 $dto->file_name = $image->getFileName();
                 $dto->file_path = $image->getFilePath();
                 $dtoImages[] = $dto;
             }
-
-
-            return $dtoImages;
         }
 
-        return null;
+        return $dtoImages;
 
     }
 }

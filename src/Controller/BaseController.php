@@ -2,8 +2,8 @@
 
 namespace App\Controller;
 
-use Exception;
 use App\Dto\PostRequest;
+use App\Dto\ImageRequest;
 use App\Services\RequestService;
 use App\Controller\Traits\ControllersTrait;
 use Symfony\Component\HttpFoundation\{Request, Response};
@@ -30,10 +30,12 @@ abstract class BaseController extends AbstractController
         $this->validator = $validator;
     }
 
-    public function createOrUpdateForPosts(Request $request, $post = null)
+    public function createOrUpdateForPosts(Request $request, $postData = null)
     {
-        $request = $this->transformJsonBody($request);
-        $dto = $this->requestService->mapContent($request, PostRequest::class);
+        $requestBody = $this->transformJsonBody($request);
+
+        $dto = $this->requestService->mapContent($requestBody, PostRequest::class);
+
         $imageDtos = $this->imageDtos($request);
 
         $errors =   $this->validator->validate($dto);
@@ -46,27 +48,30 @@ abstract class BaseController extends AbstractController
                     'errors' => $this->validationErrorResponse($errors)
                 ], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
-
         try {
 
-            $post = $post ? $this->updatePost($post, $dto, $imageDtos) : $this->createPost($dto, $imageDtos);
+            $post = $postData ? $this->updatePost($postData, $dto, $imageDtos) : $this->createPost($dto, $imageDtos);
 
-        } catch(Exception $e) {
+        } catch(\Exception $e) {
 
             $this->unlinkImages($imageDtos);
 
             return $this->json([
-                'message' => 'an error occurred while trying to register',
+                'message' => 'an error occurred',
                 'errors' => $e->getMessage()
             ], Response::HTTP_BAD_REQUEST);
         }
 
         $post = $this->postTransformer->transformFromObject($post);
 
+        $responseMessage = $postData ? "post updated successfully" : "post created successfully";
+
+        $responseStatus  = $postData ? Response::HTTP_OK : Response::HTTP_CREATED;
+
         return $this->json([
-            'message' => 'post created successfully',
+            'message' => $responseMessage,
             'data' => $post
-        ], Response::HTTP_CREATED);
+        ], $responseStatus);
     }
 
     /**

@@ -21,13 +21,16 @@ class PostTransformer extends AbstractTransformer
         $imageTransformer   = new ImageTransformer();
         $tagTransformer     = new TagTransformer();
 
-        $dto->title     = $post->getTitle();
-        $dto->content   = $post->getContent();
-        $dto->author    = $userTransformer->transformFromObject($post->getAuthor());
-        $dto->images    = $imageTransformer->transformFromObject($post->getImages());
-        $dto->tags      = $tagTransformer->transformFromObjects($post->getTags());
-        $dto->createdAt = $post->getCreatedAt();
-        $dto->updatedAt = $post->getUpdatedAt();
+        $dto->id           = $post->getId();
+        $dto->title        = $post->getTitle();
+        $dto->content      = $post->getContent();
+        $dto->author       = $userTransformer->transformFromObject($post->getAuthor());
+        $dto->images       = $imageTransformer->transformFromObject($post->getImages());
+        $dto->tags         = $tagTransformer->transformFromObjects($post->getTags());
+        $dto->is_published = $post->getIsPublished();
+        $dto->createdAt    = $post->getCreatedAt();
+        $dto->updatedAt    = $post->getUpdatedAt();
+
 
         return $dto;
     }

@@ -30,10 +30,12 @@ trait ControllersTrait
 
         $errorResponse = [];
 
-        foreach ($errors as $error) {
-
+        foreach ($errors as $key => $error) {
             $errorTitle = str_replace(['[', ']'], '', $error->getPropertyPath());
-            $errorResponse[$errorTitle] = $error->getMessage();
+
+
+            $errorResponse[$errorTitle][$key] = $error->getMessage();
+
 
         }
         return $errorResponse;

@@ -33,7 +33,6 @@ class ImageService
     public function handleUpload($image)
     {
         if (is_string($image)) {
-
             $uploadedFile = $this->uploadBase64($image);
 
         } else {
@@ -42,7 +41,7 @@ class ImageService
 
         }
 
-        return json_encode($uploadedFile);
+        return $uploadedFile;
 
 
 

@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Repository\UserRepository;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Routing\Annotation\Route;
 
 class FollowingController extends BaseController
@@ -24,9 +25,14 @@ class FollowingController extends BaseController
      */
     public function follow(User $user)
     {
-        $this->userRepo->addFollowing($this->getUser(), $user);
+        try {
+            $this->userRepo->addFollowing($this->getUser(), $user);
+        }catch(\Exception $e) {
+            throw new HttpException(Response::HTTP_BAD_REQUEST, $e->getMessage());
+        }
 
-        return $this->response([
+
+        return $this->json([
             'message' => 'user followed'
         ], Response::HTTP_OK);
     }

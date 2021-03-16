@@ -42,12 +42,14 @@ class RequestService
 
     public function mapRequestToFiles($content, $className)
     {
+
         $dto = $this->handleFileRequest($content);
 
         $dtos = [];
 
         array_map(function($dto) use (&$dtos, $className) {
-            $dtos[] = $this->serializer->deserialize( $dto,
+            $dtos[] = $this->serializer->deserialize(
+                        json_encode($dto),
                         $className,
                         'json'
                         );
@@ -63,10 +65,11 @@ class RequestService
 
         if (!is_array($request)) {
             $dto[] = $this->imageService->handleUpload($request);
-        }
 
-        foreach($request as $req) {
-           $dto[] = $this->imageService->handleUpload($req);
+        } else {
+            foreach($request as $req) {
+                $dto[] = $this->imageService->handleUpload($req);
+             }
         }
 
         return $dto;

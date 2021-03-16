@@ -8,6 +8,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 class PostRequest
 {
+    public $id;
     /**
      * @Assert\NotBlank
      * @Assert\Length(min=3)
@@ -30,6 +31,8 @@ class PostRequest
      * @Assert\Type("string")
      */
     public $tags;
+
+    public $is_published;
 
     public $createdAt;
 

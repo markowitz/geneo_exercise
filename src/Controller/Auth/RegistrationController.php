@@ -5,10 +5,13 @@ namespace App\Controller\Auth;
 use Exception;
 use App\Dto\RegisterRequest;
 use App\Controller\BaseController;
+use App\Http\ApiResponse;
 use App\Repository\UserRepository;
 use App\Services\RequestService;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
@@ -39,10 +42,10 @@ class RegistrationController extends BaseController
         $errors = $this->validator->validate($dto);
 
         if (count($errors)) {
-            return $this->response([
-                    'message' =>  'Validation Error',
-                    'errors' => $this->validationErrorResponse($errors)
-                ], Response::HTTP_UNPROCESSABLE_ENTITY);
+            return new ApiResponse('Validation Error',
+                     null,
+                     $this->validationErrorResponse($errors),
+                     Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
         $user = $this->userRepo->findBy([
@@ -50,7 +53,7 @@ class RegistrationController extends BaseController
         ]);
 
         if ($user) {
-            return $this->response([
+            return $this->json([
                 'error' => 'user already exists'
             ], Response::HTTP_BAD_REQUEST);
         }
@@ -60,15 +63,12 @@ class RegistrationController extends BaseController
 
             $this->userRepo->create($dto);
 
-        } catch (Exception $e) {
+        } catch (UniqueConstraintViolationException $exception) {
 
-            return $this->response([
-                'message' => 'an error occurred while trying to register',
-                'errors' => $e->getMessage()
-            ], Response::HTTP_BAD_REQUEST);
+          throw new HttpException(Response::HTTP_BAD_REQUEST, $exception->getMessage());
         }
 
-        return $this->RESPONSE([
+        return $this->json([
             'message' => 'user registered successfully'
             ], Response::HTTP_CREATED);
     }

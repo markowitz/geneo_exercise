@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\Images;
 use App\Entity\Post;
 use App\Entity\Tag;
+use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Serializer\SerializerInterface;
@@ -55,21 +56,24 @@ class PostRepository extends ServiceEntityRepository
      * Get  Posts by author  and other authors following
      * @return Object $user
      */
-    public function fetch(Object $user)
+    public function fetchApproved(Object $user)
     {
         $query = $this->createQueryBuilder('post')
-                        ->select('post')
-                        ->join('post.author', 'user')
+                        ->select('post');
+
+        if (!in_array(User::ADMIN, $user->getRoles())) {
+         $query =   $query->join('post.author', 'user')
                         ->leftJoin('user.followers', 'uf')
                         ->where('post.is_published = 1')
                         ->andWhere('user = :user OR post.author IN(:userfollowing)')
                         ->setParameter('user', $user)
-                        ->setParameter('userfollowing', $user->getFollowing())
-                        ->orderBy('post.created_at', 'DESC')
-                        ->getQuery()
-                        ->getResult();
+                        ->setParameter('userfollowing', $user->getFollowing());
+        }
 
-            return $query;
+        $query = $query->orderBy('post.created_at', 'DESC')
+                        ->getQuery()->getResult();
+
+        return $query;
     }
 
      /**
@@ -91,10 +95,10 @@ class PostRepository extends ServiceEntityRepository
     }
 
     /**
-     * Get pending posts
-     * @return Collection $posts
+     * Get all pending posts
+     * @return Post[] Returns an array of Post objects
      */
-    public function fetchPendingPosts()
+    public function fetchAllPendingPosts()
     {
         $query = $this->createQueryBuilder('post')
                         ->select('post')
@@ -104,6 +108,25 @@ class PostRepository extends ServiceEntityRepository
                         ->getResult();
 
             return $query;
+    }
+
+    /**
+     * get auth user pending posts
+     * @param Object $user
+     * @return Post[] Returns an array of Post objects
+     */
+    public function fetchUserPendingPosts(Object $user)
+    {
+        $query = $this->createQueryBuilder('post')
+                        ->select('post')
+                        ->where('post.is_published = 0')
+                        ->andWhere('post.author = :user')
+                        ->setParameter('user', $user)
+                        ->orderBy('post.created_at', 'DESC')
+                        ->getQuery()
+                        ->getResult();
+
+        return $query;
     }
 
     /**
@@ -173,12 +196,29 @@ class PostRepository extends ServiceEntityRepository
                     $post->getTags()->removeElement($tag);
                     $post->addTag($tagExist);
                 } else {
-                    $post->addTag($tag->name);
+                    $post->addTag($tag);
                     $this->_em->persist($tag);
                 }
 
             }
         }
+    }
+
+    /**
+     * @param Post $post
+     */
+    public function delete($post)
+    {
+        $images = $post->getImages();
+
+        if (count($images)) {
+            foreach($images as $image) {
+                unlink($image->getFilePath());
+            }
+        }
+
+        $this->_em->remove($post);
+        $this->_em->flush();
     }
 
     // /**

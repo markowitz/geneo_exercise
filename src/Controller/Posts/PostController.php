@@ -3,28 +3,17 @@
 namespace App\Controller\Posts;
 
 use App\Controller\BaseController;
-use App\Controller\Traits\ControllersTrait;
 use App\Dto\ApprovalRequest;
-use App\Dto\ImageRequest;
-use App\Dto\PostRequest;
 use App\Dto\Transformer\PostTransformer;
 use App\Entity\Post;
 use App\Entity\User;
-use App\Exceptions\HttpException;
 use App\Repository\PostRepository;
 use App\Services\RequestService;
-use Exception;
-use OCI_Lob;
-use phpDocumentor\Reflection\Types\Parent_;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
-use Symfony\Component\Validator\Constraints as Assert;
-use Throwable;
-use Webmozart\Assert\Assert as AssertAssert;
 
 class PostController extends BaseController
 {
@@ -56,11 +45,11 @@ class PostController extends BaseController
 
     /**
      * @Route("/api/posts", name="api_posts", methods={"GET"})
-     */
-    public function fetch()
+    */
+    public function fetchPosts()
     {
         $user = $this->getUser();
-        $posts = $this->postRepo->fetch($user);
+        $posts = $this->postRepo->fetchApproved($user);
         $posts = $this->postTransformer->transformFromObjects($posts);
 
         return $this->json([
@@ -80,7 +69,7 @@ class PostController extends BaseController
 
             $post = $this->postRepo->findOneBy(['slug' => $slug]);
 
-        } catch(Throwable $e) {
+        } catch(\Throwable $e) {
 
             throw $this->createNotFoundException('page not found');
         }
@@ -122,14 +111,14 @@ class PostController extends BaseController
 
             $post = $this->postRepo->findOneBy(['slug' => $post->getSlug()]);
 
-        } catch(Throwable $e) {
+        } catch(\Throwable $e) {
 
             throw $this->createNotFoundException('page not found');
         }
 
         $request = $this->transformJsonBody($request);
 
-        $dto = $this->requestService->mapContent($request, ApprovalRequest::class);
+        $dto = $this->serviceRequest($request, ApprovalRequest::class);
 
         $errors = $this->validator->validate($dto);
 
@@ -144,7 +133,7 @@ class PostController extends BaseController
 
             $this->postRepo->approval($post, $dto->approved);
 
-        } catch(Exception $e) {
+        } catch(\Exception $e) {
             throw new HttpException($e->getMessage());
         }
 
@@ -163,7 +152,23 @@ class PostController extends BaseController
         return parent::createOrUpdateForPosts($request, $post);
     }
 
+    /**
+     * @Route("/api/post/{id}", name="delete_post", methods={"DELETE"})
+     */
+    public function delete(Post $post)
+    {
+        $this->denyAccessUnlessGranted('delete', $post);
 
+        try {
+            $this->postRepo->delete($post);
+        } catch(\Exception $e) {
+
+            throw new HttpException(Response::HTTP_BAD_REQUEST, $e->getMessage());
+
+        }
+
+        return $this->json(null, Response::HTTP_NO_CONTENT);
+    }
 
 }
 
