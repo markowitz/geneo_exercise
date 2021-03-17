@@ -46,8 +46,13 @@ class AdminController extends AbstractController
      */
     private $validator;
 
-    public function __construct(PostRepository $postRepo, PostTransformer $postTransformer, RequestService $requestService, UserRepository $userRepo, ValidatorInterface $validator)
+    public function __construct(PostRepository $postRepo,
+                                PostTransformer $postTransformer,
+                                RequestService $requestService,
+                                UserRepository $userRepo,
+                                ValidatorInterface $validator)
     {
+
         $this->postRepo = $postRepo;
         $this->postTransformer = $postTransformer;
         $this->requestService = $requestService;
@@ -72,19 +77,17 @@ class AdminController extends AbstractController
      /**
      * @Route("/api/admin/post/{id}/approval", name="approve_post", methods={"POST"})
      */
-    public function approval(Request $request, Post $post)
-    {
+    public function approval(Request $request, $id) {
+
+        $post = $this->postRepo->find($id);
+
+        if (!$post) {
+            return $this->json([
+                'message' => 'Post not found'
+            ], Response::HTTP_NOT_FOUND);
+        }
 
         $this->denyAccessUnlessGranted(User::ADMIN);
-
-        try {
-
-            $post = $this->postRepo->findOneBy(['slug' => $post->getSlug()]);
-
-        } catch(\Throwable $e) {
-
-            throw $this->createNotFoundException('page not found');
-        }
 
         $request = $this->transformJsonBody($request);
 
@@ -99,13 +102,7 @@ class AdminController extends AbstractController
                 ], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-        try {
-
-            $this->postRepo->approval($post, $dto->approved);
-
-        } catch(\Exception $e) {
-            throw new HttpException($e->getMessage());
-        }
+        $this->postRepo->approval($post, $dto->approved);
 
         return $this->json([
             'message' => "success"
@@ -113,22 +110,22 @@ class AdminController extends AbstractController
     }
 
     /**
-     * @Route("/api/admin/user/{user}", name="admin_delete_user", methods={"DELETE"})
+     * @Route("/api/admin/user/{id}", name="admin_delete_user", methods={"DELETE"})
      */
-    public function delete(User $user)
+    public function delete($id)
     {
-        $this->denyAccessUnlessGranted(User::ADMIN);
+        $user = $this->userRepo->find($id);
 
-        try {
-
-            $this->userRepo->delete($user);
-
-        } catch(\Exception $e) {
-            throw new HttpException(Response::HTTP_BAD_REQUEST, $e->getMessage());
+        if (!$user) {
+            return $this->json([
+                'message' => 'User not found'
+            ], Response::HTTP_NOT_FOUND);
         }
 
-        return $this->json(null, Response::HTTP_NO_CONTENT);
+        $this->denyAccessUnlessGranted(User::ADMIN);
+        $this->userRepo->delete($user);
 
+        return $this->json(null, Response::HTTP_NO_CONTENT);
 
     }
 }

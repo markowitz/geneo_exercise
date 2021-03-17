@@ -2,53 +2,141 @@
 
 namespace App\Controller\Posts;
 
-use App\Controller\BaseController;
-use App\Dto\Transformer\PostTransformer;
 use App\Entity\Post;
-use App\Entity\User;
-use App\Repository\PostRepository;
 use App\Services\RequestService;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\HttpException;
+use App\Repository\PostRepository;
+use App\Dto\{PostRequest, ImageRequest};
+use App\Controller\Traits\ControllersTrait;
+use App\Dto\Transformer\PostTransformer;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\{Request, Response};
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
-class PostController extends BaseController
+class PostController extends AbstractController
 {
+    use ControllersTrait;
+
     /**
      * @var PostRepo
      */
-    public $postRepo;
+    private $postRepo;
 
     /**
      * @var PostTransformer
      */
-    public $postTransformer;
+    private $postTransformer;
 
-    public function __construct(RequestService $requestService, ValidatorInterface $validator, PostRepository $postRepo, PostTransformer $postTransformer)
-    {
-        parent::__construct($requestService, $validator);
+    /**
+     * @var RequestService
+     */
+    private $requestService;
 
+    /**
+     * @var Validator
+     */
+    private $validator;
+
+
+    public function __construct(RequestService $requestService,
+                                ValidatorInterface $validator,
+                                PostRepository $postRepo,
+                                PostTransformer $postTransformer) {
+
+        $this->requestService = $requestService;
+        $this->validator = $validator;
         $this->postRepo = $postRepo;
         $this->postTransformer = $postTransformer;
     }
 
     /**
+     * create post
      * @Route("/api/post", name="create_post", methods={"POST"})
      */
     public function create(Request $request)
     {
-        return parent::createOrUpdateForPosts($request);
+        $requestBody = $this->transformJsonBody($request);
+
+        $postRequestDto = $this->requestService->mapContent($requestBody, PostRequest::class);
+
+        $imageDtos = $this->imageDtos($request);
+
+        $errors =   $this->validator->validate($postRequestDto);
+
+        if (count($errors)) {
+
+            $this->unlinkImages($imageDtos);
+
+            return $this->json([
+                    'message' =>  'Validation Error',
+                    'errors' => $this->validationErrorResponse($errors)
+                ], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+
+        $post = $this->postRepo->create($postRequestDto, $this->getUser(), $imageDtos);
+
+        $post = $this->postTransformer->transformFromObject($post);
+
+        return $this->json([
+            'message' => "post created successfully",
+            'data' => $post
+        ], Response::HTTP_CREATED);
+    }
+
+     /**
+      * edit post
+     * @Route("/api/post/{id}/edit", name="edit_post", methods={"POST"})
+     */
+    public function edit(Request $request, $id)
+    {
+        $post = $this->postRepo->find($id);
+
+        if (!$post) {
+            return $this->json([
+                'message' => 'post not found'
+            ], Response::HTTP_NOT_FOUND);
+        }
+
+        $this->denyAccessUnlessGranted('edit', $post);
+
+        $requestBody = $this->transformJsonBody($request);
+
+        $dto = $this->requestService->mapContent($requestBody, PostRequest::class);
+
+        $imageDtos = $this->imageDtos($request);
+
+        $errors =   $this->validator->validate($dto);
+
+        if (count($errors)) {
+
+            $this->unlinkImages($imageDtos);
+
+            return $this->json([
+                    'message' =>  'Validation Error',
+                    'errors' => $this->validationErrorResponse($errors)
+                ], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+
+        $post = $this->postRepo->update($post, $dto, $this->getUser(), $imageDtos);
+        $post = $this->postTransformer->transformFromObject($post);
+
+        return $this->json([
+            'message' => "post updated successfully",
+            'data' => $post
+        ], Response::HTTP_CREATED);
+
     }
 
     /**
+     * fetch posts
      * @Route("/api/posts", name="api_posts", methods={"GET"})
     */
     public function fetchPosts()
     {
         $user = $this->getUser();
+
         $posts = $this->postRepo->fetchApproved($user);
+
         $posts = $this->postTransformer->transformFromObjects($posts);
 
         return $this->json([
@@ -58,18 +146,18 @@ class PostController extends BaseController
     }
 
     /**
+     * view single post
      * @Route("/api/post/{slug}", name="fetch_post", methods={"GET"})
      */
     public function show(String $slug)
     {
+        $post = $this->postRepo->findOneBy(['slug' => $slug]);
 
-        try {
+        if (!$post) {
 
-            $post = $this->postRepo->findOneBy(['slug' => $slug]);
-
-        } catch(\Throwable $e) {
-
-            throw $this->createNotFoundException('page not found');
+            return $this->json([
+                'message' => 'Not found'
+            ], Response::HTTP_NOT_FOUND);
         }
 
         $this->denyAccessUnlessGranted('view', $post);
@@ -83,31 +171,59 @@ class PostController extends BaseController
     }
 
     /**
-     * @Route("/api/post/{id}/edit", name="edit_post", methods={"POST"})
+     * delete post
+     * @Route("/api/post/{id}", name="delete_post", methods={"DELETE"})
      */
-    public function edit(Post $post, Request $request)
+    public function delete($id)
     {
-        $this->denyAccessUnlessGranted('edit', $post);
+        $post = $this->postRepo->find($id);
 
-        return parent::createOrUpdateForPosts($request, $post);
+        if (!$post) {
+
+            return $this->json([
+                'message' => 'post not found'
+            ], Response::HTTP_NOT_FOUND);
+        }
+
+        $this->denyAccessUnlessGranted('delete', $post);
+
+        $this->postRepo->delete($post);
+
+        return $this->json(null, Response::HTTP_NO_CONTENT);
     }
 
     /**
-     * @Route("/api/post/{id}", name="delete_post", methods={"DELETE"})
+     * Unlink Images
+     * @param array $imageDtos
      */
-    public function delete(Post $post)
-    {
-        $this->denyAccessUnlessGranted('delete', $post);
+    protected function unlinkImages($imageDtos) {
 
-        try {
-            $this->postRepo->delete($post);
-        } catch(\Exception $e) {
+        if (count($imageDtos)) {
 
-            throw new HttpException(Response::HTTP_BAD_REQUEST, $e->getMessage());
+            array_walk($imageDtos, function($imageDto) {
+                unlink('uploads/images/'.$imageDto->file_name);
+            });
 
         }
+    }
 
-        return $this->json(null, Response::HTTP_NO_CONTENT);
+     /**
+      * handles the image request
+     * @param Request $request
+     * @return Array $imageDtos
+     */
+    protected function imageDtos($request)
+    {
+        $imageDtos = [];
+
+        if ($request->get('images') || $request->files->count() > 0) {
+
+            $request = $request->get('images') ?? $request->files->all()['images'];
+
+            $imageDtos = $this->requestService->mapRequestToFiles($request, ImageRequest::class);
+        }
+
+        return $imageDtos;
     }
 
 

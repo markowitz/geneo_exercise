@@ -32,26 +32,10 @@ trait ControllersTrait
 
         foreach ($errors as $key => $error) {
             $errorTitle = str_replace(['[', ']'], '', $error->getPropertyPath());
-
-
             $errorResponse[$errorTitle][$key] = $error->getMessage();
-
-
         }
+
         return $errorResponse;
     }
 
-    /**
-     * @param array $imageDtos
-     */
-    public function unlinkImages($imageDtos)
-    {
-        if (count($imageDtos)) {
-
-            array_walk($imageDtos, function($imageDto) {
-                unlink('uploads/images/'.$imageDto->file_name);
-            });
-
-        }
-    }
 }

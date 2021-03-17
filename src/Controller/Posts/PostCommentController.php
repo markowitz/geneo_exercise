@@ -4,18 +4,22 @@ namespace App\Controller\Posts;
 
 use App\Entity\Post;
 use App\Controller\BaseController;
+use App\Controller\Traits\ControllersTrait;
 use App\Dto\PostCommentRequest;
 use App\Dto\Transformer\PostCommentTransformer;
 use App\Repository\PostCommentRepository;
 use App\Services\RequestService;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
-class PostCommentController extends BaseController
+class PostCommentController extends AbstractController
 {
+
+    use ControllersTrait;
 
     /**
      * @var PostCommentRepo
@@ -27,10 +31,23 @@ class PostCommentController extends BaseController
      */
     private $postCommentTransformer;
 
-    public function __construct(RequestService $requestService, ValidatorInterface $validator, PostCommentRepository $postCommentRepo, PostCommentTransformer $postCommentTransformer)
-    {
-        parent::__construct($requestService, $validator);
+    /**
+     * @var RequestService
+     */
+    public $requestService;
 
+     /**
+     * @var Validator
+     */
+    public $validator;
+
+    public function __construct(RequestService $requestService,
+                                ValidatorInterface $validator,
+                                PostCommentRepository $postCommentRepo,
+                                PostCommentTransformer $postCommentTransformer)
+    {
+        $this->requestService  = $requestService;
+        $this->validator  = $validator;
         $this->postCommentRepo = $postCommentRepo;
         $this->postCommentTransformer = $postCommentTransformer;
 
@@ -44,17 +61,19 @@ class PostCommentController extends BaseController
 
         $request = $this->transformJsonBody($request);
 
-        $dto = $this->serviceRequest($request, PostCommentRequest::class);
+        $postCommentDto = $this->requestService->mapContent($request, PostCommentRequest::class);
 
-        try {
-            $postComment = $this->postCommentRepo->create($post, $dto, $this->getUser());
-            $postComment = $this->postCommentTransformer->transformFromObject($postComment);
+        $errors = $this->validator->validate($postCommentDto);
 
-        } catch (HttpException $e) {
-
-            throw new HttpException($e->getMessage(), Response::HTTP_BAD_REQUEST);
-
+        if (count($errors)) {
+            return $this->json([
+                'message' => 'Validation Error',
+                'errors' => $this->validationErrorResponse($errors)
+            ], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
+
+        $postComment = $this->postCommentRepo->create($post, $postCommentDto, $this->getUser());
+        $postComment = $this->postCommentTransformer->transformFromObject($postComment);
 
         return $this->json([
             'data' => $postComment

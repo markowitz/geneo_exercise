@@ -54,7 +54,8 @@ class PostRepository extends ServiceEntityRepository
 
      /**
      * Get  Posts by author  and other authors following
-     * @return Object $user
+     * @param Object $user
+     * @return Post [] returns an array of post objects
      */
     public function fetchApproved(Object $user)
     {
@@ -77,7 +78,7 @@ class PostRepository extends ServiceEntityRepository
     }
 
      /**
-     * Get Single Post by author and post slug
+     * Get Single Post by post slug
      * @param String $slug
      * @return Post $post
      */
@@ -86,7 +87,6 @@ class PostRepository extends ServiceEntityRepository
         $query = $this->createQueryBuilder('post')
                         ->select('post')
                         ->where('post.slug = :slug')
-                        ->where('post.approved = 1')
                         ->setParameter('slug', $slug)
                         ->getQuery()
                         ->getOneOrNullResult();
@@ -136,7 +136,7 @@ class PostRepository extends ServiceEntityRepository
      */
     public function approval(Post $post, $status)
     {
-        $post->getApproved($status);
+        $post->setApproved($status);
 
         $this->_em->persist($post);
         $this->_em->flush();
@@ -148,8 +148,9 @@ class PostRepository extends ServiceEntityRepository
      * @param Object $dto
      * @param Object $user
      * @param Array $imageDtos
+     * @return Post $post;
      */
-    public function update(Post $post, $dto, Object $user, $imageDtos)
+    public function update(Post $post, Object $dto, Object $user, array $imageDtos)
     {
         $post->setTitle($dto->title);
         $post->setContent($dto->content);
@@ -163,52 +164,55 @@ class PostRepository extends ServiceEntityRepository
     }
 
     /**
+     * Persist Images
      * @param Post $post
      * @param Array $images
      */
     public function addImages($post, $images)
     {
-        if (count($images)) {
+        if (!count($images)) {
+            return;
+        }
 
-            foreach($images as $image) {
+        foreach($images as $image) {
+            $newImage = new Images();
+            $newImage->setFileName($image->file_name);
+            $newImage->setFilePath($image->file_path);
+            $post->addImage($newImage);
+            $this->_em->persist($newImage);
 
-                $newImage = new Images();
-                $newImage->setFileName($image->file_name);
-                $newImage->setFilePath($image->file_path);
-                $post->addImage($newImage);
-                $this->_em->persist($newImage);
-
-            }
         }
     }
 
     /**
+     * Persist tags
      * @param Post $post
      * @param Array $tags
      */
     public function addTag($post, $tags)
     {
-        if (count($tags)) {
-            foreach($tags as $tag) {
-                $tagExist = $this->tagRepo->findOneBy(['name' => $tag->getName()]);
+        if (!count($tags)) {
+               return;
+        }
 
-                if ($tagExist ) {
-                    $post->getTags()->removeElement($tag);
-                    $post->addTag($tagExist);
-                } else {
-                    $post->addTag($tag);
-                    $this->_em->persist($tag);
-                }
+        foreach($tags as $tag) {
+            $tagExist = $this->tagRepo->findOneBy(['name' => $tag->getName()]);
 
+            if ($tagExist ) {
+                $post->getTags()->removeElement($tag);
+                $post->addTag($tagExist);
+            } else {
+                $post->addTag($tag);
+                $this->_em->persist($tag);
             }
         }
-    }
+}
 
     /**
+     * delete post
      * @param Post $post
      */
-    public function delete($post)
-    {
+    public function delete($post) {
         $images = $post->getImages();
 
         if (count($images)) {

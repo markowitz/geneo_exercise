@@ -42,9 +42,6 @@ class ImageService
         }
 
         return $uploadedFile;
-
-
-
     }
 
 
@@ -57,9 +54,7 @@ class ImageService
         $checkBase64   = $this->checkBase64($images);
 
         if (!$checkBase64) {
-
             throw new HttpException(Response::HTTP_BAD_REQUEST, 'invalid file input');
-
         }
 
         return $this->convertToBase64($images);
@@ -77,9 +72,7 @@ class ImageService
         $volations = $this->imageValidator->validate($uploadedFile);
 
         if (count($volations) > 0) {
-
             throw new HttpException(Response::HTTP_BAD_REQUEST, $volations[0]->getMessage());
-
         }
 
         return $this->uploadImage($uploadedFile, true);

@@ -44,7 +44,6 @@ class PostTest extends BaseTestBundle
             "images" => base64_encode(file_get_contents($this->faker->imageUrl(640, 480, 'animals', true)))
         ];
 
-
         $this->client->request('POST', 'post',
             [],
             [],
@@ -96,7 +95,6 @@ class PostTest extends BaseTestBundle
             'tags' => 'lagos, benin'
         ];
 
-
         $this->client->request('POST', 'post',
             [],
             [],
@@ -107,6 +105,7 @@ class PostTest extends BaseTestBundle
         $response = json_decode($this->client->getResponse()->getContent(), true);
 
         $this->assertResponseStatusCodeSame(422);
+
         $this->assertContains('This value should not be blank.', $response['errors']['title']);
 
     }
@@ -125,7 +124,6 @@ class PostTest extends BaseTestBundle
             'tags' => 'lagos, benin'
         ];
 
-
         $this->client->request('POST', 'post',
             [],
             [],
@@ -135,8 +133,8 @@ class PostTest extends BaseTestBundle
 
         $response = json_decode($this->client->getResponse()->getContent(), true);
 
-
         $this->assertResponseStatusCodeSame(422);
+
         $this->assertContains('This value is too short. It should have 3 characters or more.', $response['errors']['title']);
 
     }
@@ -155,7 +153,6 @@ class PostTest extends BaseTestBundle
             'tags' => 'lagos, benin'
         ];
 
-
         $this->client->request('POST', 'post',
             [],
             [],
@@ -166,6 +163,7 @@ class PostTest extends BaseTestBundle
         $response = json_decode($this->client->getResponse()->getContent(), true);
 
         $this->assertResponseStatusCodeSame(422);
+
         $this->assertContains('This value should not be null.', $response['errors']['title']);
 
     }
@@ -184,7 +182,6 @@ class PostTest extends BaseTestBundle
             'tags' => 'lagos, benin'
         ];
 
-
         $this->client->request('POST', 'post',
             [],
             [],
@@ -193,7 +190,9 @@ class PostTest extends BaseTestBundle
         );
 
         $response = json_decode($this->client->getResponse()->getContent(), true);
-        $this->assertEquals(422, $this->client->getResponse()->getStatusCode());
+
+        $this->assertResponseStatusCodeSame(422);
+
         $this->assertContains('This value should not be blank.', $response['errors']['content']);
 
     }
@@ -212,7 +211,6 @@ class PostTest extends BaseTestBundle
             'tags' => 'lagos, benin'
         ];
 
-
         $this->client->request('POST', 'post',
             [],
             [],
@@ -222,7 +220,8 @@ class PostTest extends BaseTestBundle
 
         $response = json_decode($this->client->getResponse()->getContent(), true);
 
-        $this->assertEquals(422, $this->client->getResponse()->getStatusCode());
+        $this->assertResponseStatusCodeSame(422);
+
         $this->assertContains('This value is too short. It should have 8 characters or more.', $response['errors']['content']);
 
     }
@@ -241,7 +240,6 @@ class PostTest extends BaseTestBundle
             'tags' => 'lagos, benin'
         ];
 
-
         $this->client->request('POST', 'post',
             [],
             [],
@@ -251,7 +249,8 @@ class PostTest extends BaseTestBundle
 
         $response = json_decode($this->client->getResponse()->getContent(), true);
 
-        $this->assertEquals(422, $this->client->getResponse()->getStatusCode());
+        $this->assertResponseStatusCodeSame(422);
+
         $this->assertContains('This value should not be null.', $response['errors']['content']);
 
     }
@@ -270,7 +269,6 @@ class PostTest extends BaseTestBundle
             'tags' => ['lagos, benin']
         ];
 
-
         $this->client->request('POST', 'post',
             [],
             [],
@@ -280,7 +278,8 @@ class PostTest extends BaseTestBundle
 
         $response = json_decode($this->client->getResponse()->getContent(), true);
 
-        $this->assertEquals(422, $this->client->getResponse()->getStatusCode());
+        $this->assertResponseStatusCodeSame(422);
+
         $this->assertContains('This value should be of type string.', $response['errors']['tags']);
 
     }
@@ -313,7 +312,6 @@ class PostTest extends BaseTestBundle
         $this->assertResponseStatusCodeSame(200);
 
         $this->assertCount(1, $response['data']);
-
 
     }
 
@@ -394,7 +392,9 @@ class PostTest extends BaseTestBundle
 
     }
 
-
+    /**
+     * author can view single published posts
+     */
     public function testAuthorCanViewSinglePublishedPost()
     {
         $header = $this->authorize();
@@ -423,6 +423,9 @@ class PostTest extends BaseTestBundle
 
     }
 
+    /**
+     * author can view single unpublished post
+     */
     public function testAuthorCanViewSingleUnpublishedPost()
     {
         $header = $this->authorize();
@@ -449,6 +452,9 @@ class PostTest extends BaseTestBundle
 
     }
 
+    /**
+     * user cannot view single post if not author
+     */
     public function testUserCannotViewSingleUnpublishedPostIfNotAuthor()
     {
         $data = [
@@ -475,12 +481,13 @@ class PostTest extends BaseTestBundle
         [],
         $authUser);
 
-        $response = json_decode($this->client->getResponse()->getContent(), true);
-
         $this->assertResponseStatusCodeSame(403);
 
     }
 
+    /**
+     * user cannot view single published post if not following user
+     */
     public function testUserCannotViewSinglePublishedPostIfNotFollowingAuthor()
     {
         $data = [
@@ -509,12 +516,13 @@ class PostTest extends BaseTestBundle
         [],
         $authUser);
 
-        $response = json_decode($this->client->getResponse()->getContent(), true);
-
         $this->assertResponseStatusCodeSame(403);
 
     }
 
+    /**
+     * test user can view single published post of users they floow
+     */
     public function testUserCanViewSinglePublishedPostOfUsersTheyFollow()
     {
         $data = [
@@ -525,12 +533,12 @@ class PostTest extends BaseTestBundle
 
         $user = $this->register($data);
 
-        $userFollow = $this->authorize();
+        $follower = $this->authorize();
 
         $this->client->request('POST', "following/{$user->getId()}",
                 [],
                 [],
-                $userFollow
+                $follower
         );
 
         $postAuthor = $this->authorize($data);
@@ -549,7 +557,7 @@ class PostTest extends BaseTestBundle
         $this->client->request('GET', "post/{$postRepo->getSlug()}",
         [],
         [],
-        $userFollow);
+        $follower);
 
         $response = json_decode($this->client->getResponse()->getContent(), true);
 
@@ -559,6 +567,9 @@ class PostTest extends BaseTestBundle
 
     }
 
+    /**
+     * test admin can fetch all pending posts
+     */
     public function testAdminCanFetchAllPendingPosts()
     {
         $data = [
@@ -587,6 +598,9 @@ class PostTest extends BaseTestBundle
 
     }
 
+    /**
+     * author can delete post
+     */
     public function testAuthorCanDeletePost()
     {
         $header = $this->authorize();
@@ -602,6 +616,9 @@ class PostTest extends BaseTestBundle
 
     }
 
+    /**
+     * user cannot delete post if not owner
+     */
     public function testUserCannotDeletePostIfNotOwner()
     {
         $data = [
@@ -626,6 +643,9 @@ class PostTest extends BaseTestBundle
         $this->assertResponseStatusCodeSame(403);
     }
 
+    /**
+     * admin can delete post
+     */
     public function testAdminCanDeletePost()
     {
         $data = [
@@ -650,6 +670,9 @@ class PostTest extends BaseTestBundle
         $this->assertResponseStatusCodeSame(204);
     }
 
+    /**
+     * admin can approve post
+     */
     public function testAdminCanApprovePost()
     {
         $data = [

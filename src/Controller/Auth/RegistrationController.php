@@ -2,30 +2,43 @@
 
 namespace App\Controller\Auth;
 
-use Exception;
+use App\Controller\Traits\ControllersTrait;
 use App\Dto\RegisterRequest;
-use App\Controller\BaseController;
 use App\Http\ApiResponse;
 use App\Repository\UserRepository;
 use App\Services\RequestService;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
-class RegistrationController extends BaseController
+class RegistrationController extends AbstractController
 {
+
+    use ControllersTrait;
 
     /**
      * @var UserRepo
      */
     private $userRepo;
 
+     /**
+     * @var Validator
+     */
+    private $validator;
+
+     /**
+     * @var RequestService
+     */
+    private $requestService;
+
     public function __construct(RequestService $requestService, ValidatorInterface $validator, UserRepository $userRepo)
     {
-        parent::__construct($requestService, $validator);
+        $this->requestService = $requestService;
+        $this->validator = $validator;
         $this->userRepo = $userRepo;
     }
 
@@ -42,15 +55,14 @@ class RegistrationController extends BaseController
         $errors = $this->validator->validate($dto);
 
         if (count($errors)) {
-            return new ApiResponse('Validation Error',
-                     null,
-                     $this->validationErrorResponse($errors),
-                     Response::HTTP_UNPROCESSABLE_ENTITY);
+            return $this->json([
+                'message' => 'Validation Error',
+                'errors' => $this->validationErrorResponse($errors),
+            ], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-        $user = $this->userRepo->findBy([
-            'email' => $dto->email
-        ]);
+        $user = $this->userRepo->findOneBy([
+                'email' => $dto->email ]);
 
         if ($user) {
             return $this->json([
@@ -58,15 +70,7 @@ class RegistrationController extends BaseController
             ], Response::HTTP_BAD_REQUEST);
         }
 
-
-        try {
-
-            $this->userRepo->create($dto);
-
-        } catch (UniqueConstraintViolationException $exception) {
-
-          throw new HttpException(Response::HTTP_BAD_REQUEST, $exception->getMessage());
-        }
+        $this->userRepo->create($dto);
 
         return $this->json([
             'message' => 'user registered successfully'
