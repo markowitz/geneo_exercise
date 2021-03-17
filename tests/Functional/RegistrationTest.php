@@ -26,7 +26,7 @@ class RegsitrationTest extends WebTestCase
 
         $response = json_decode($client->getResponse()->getContent(), true);
 
-        $this->assertEquals(201, $client->getResponse()->getStatusCode());
+        $this->assertResponseStatusCodeSame(201);
         $this->assertEquals('user registered successfully', $response['message']);
         $this->assertResponseIsSuccessful();
 
@@ -51,7 +51,7 @@ class RegsitrationTest extends WebTestCase
 
         $response = json_decode($client->getResponse()->getContent(), true);
 
-        $this->assertEquals(422, $client->getResponse()->getStatusCode());
+        $this->assertResponseStatusCodeSame(422);
         $this->assertContains('This value should not be blank.', $response['errors']['name']);
 
     }
@@ -75,7 +75,7 @@ class RegsitrationTest extends WebTestCase
 
         $response = json_decode($client->getResponse()->getContent(), true);
 
-        $this->assertEquals(422, $client->getResponse()->getStatusCode());
+        $this->assertResponseStatusCodeSame(422);
         $this->assertContains('This value is too short. It should have 3 characters or more.', $response['errors']['name']);
 
     }
@@ -99,7 +99,7 @@ class RegsitrationTest extends WebTestCase
 
         $response = json_decode($client->getResponse()->getContent(), true);
 
-        $this->assertEquals(422, $client->getResponse()->getStatusCode());
+        $this->assertResponseStatusCodeSame(422);
         $this->assertContains('This value should not be blank.', $response['errors']['email']);
 
     }
@@ -123,7 +123,7 @@ class RegsitrationTest extends WebTestCase
 
         $response = json_decode($client->getResponse()->getContent(), true);
 
-        $this->assertEquals(422, $client->getResponse()->getStatusCode());
+        $this->assertResponseStatusCodeSame(422);
         $this->assertContains('This value is not a valid email address.', $response['errors']['email']);
 
     }
@@ -147,7 +147,7 @@ class RegsitrationTest extends WebTestCase
         );
 
         $response = json_decode($client->getResponse()->getContent(), true);
-        $this->assertEquals(422, $client->getResponse()->getStatusCode());
+        $this->assertResponseStatusCodeSame(422);
         $this->assertContains('This value is too short. It should have 8 characters or more.', $response['errors']['password']);
 
     }
@@ -171,7 +171,7 @@ class RegsitrationTest extends WebTestCase
 
         $response = json_decode($client->getResponse()->getContent(), true);
 
-        $this->assertEquals(422, $client->getResponse()->getStatusCode());
+        $this->assertResponseStatusCodeSame(422);
         $this->assertContains('password must contain at least a number', $response['errors']['password']);
 
     }

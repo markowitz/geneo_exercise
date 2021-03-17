@@ -15,6 +15,7 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Dto\ApprovalRequest;
 use App\Repository\UserRepository;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class AdminController extends AbstractController
 {
@@ -40,12 +41,18 @@ class AdminController extends AbstractController
      */
     private $userRepo;
 
-    public function __construct(PostRepository $postRepo, PostTransformer $postTransformer, RequestService $requestService, UserRepository $userRepo)
+    /**
+     * @var Validator
+     */
+    private $validator;
+
+    public function __construct(PostRepository $postRepo, PostTransformer $postTransformer, RequestService $requestService, UserRepository $userRepo, ValidatorInterface $validator)
     {
         $this->postRepo = $postRepo;
         $this->postTransformer = $postTransformer;
         $this->requestService = $requestService;
         $this->userRepo = $userRepo;
+        $this->validator = $validator;
     }
 
     /**
@@ -101,7 +108,7 @@ class AdminController extends AbstractController
         }
 
         return $this->json([
-            'message' => "post approved successfully"
+            'message' => "success"
         ], Response::HTTP_OK);
     }
 

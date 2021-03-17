@@ -43,7 +43,7 @@ class LoginTest extends WebTestCase
             json_encode($loginDetails)
         );
 
-        $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
+        $this->assertResponseStatusCodeSame(200);
 
     }
 
@@ -72,7 +72,7 @@ class LoginTest extends WebTestCase
             json_encode($loginDetails)
         );
 
-        $this->assertEquals(401, $this->client->getResponse()->getStatusCode());
+        $this->assertResponseStatusCodeSame(401);
 
     }
 
@@ -101,7 +101,7 @@ class LoginTest extends WebTestCase
             json_encode($loginDetails)
         );
 
-        $this->assertEquals(404, $this->client->getResponse()->getStatusCode());
+        $this->assertResponseStatusCodeSame(404);
 
     }
 }

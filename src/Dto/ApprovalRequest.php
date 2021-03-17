@@ -9,7 +9,8 @@ class ApprovalRequest
     /**
      * @Assert\NotBlank
      * @Assert\NotNull
-     * @Assert\Type("bool")
+     * @Assert\Type("integer")
+     * @Assert\Range(min=0, max=1)
      */
     public $approved;
 }

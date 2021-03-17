@@ -27,7 +27,7 @@ class PostTest extends BaseTestBundle
             json_encode($post)
         );
 
-        $this->assertEquals(201, $this->client->getResponse()->getStatusCode());
+        $this->assertResponseStatusCodeSame(201);
 
     }
 
@@ -52,7 +52,7 @@ class PostTest extends BaseTestBundle
             json_encode($post)
         );
 
-        $this->assertEquals(201, $this->client->getResponse()->getStatusCode());
+        $this->assertResponseStatusCodeSame(201);
 
     }
 
@@ -78,7 +78,7 @@ class PostTest extends BaseTestBundle
             json_encode($post)
         );
 
-        $this->assertEquals(201, $this->client->getResponse()->getStatusCode());
+        $this->assertResponseStatusCodeSame(201);
 
     }
 
@@ -105,7 +105,8 @@ class PostTest extends BaseTestBundle
         );
 
         $response = json_decode($this->client->getResponse()->getContent(), true);
-        $this->assertEquals(422, $this->client->getResponse()->getStatusCode());
+
+        $this->assertResponseStatusCodeSame(422);
         $this->assertContains('This value should not be blank.', $response['errors']['title']);
 
     }
@@ -134,7 +135,8 @@ class PostTest extends BaseTestBundle
 
         $response = json_decode($this->client->getResponse()->getContent(), true);
 
-        $this->assertEquals(422, $this->client->getResponse()->getStatusCode());
+
+        $this->assertResponseStatusCodeSame(422);
         $this->assertContains('This value is too short. It should have 3 characters or more.', $response['errors']['title']);
 
     }
@@ -163,7 +165,7 @@ class PostTest extends BaseTestBundle
 
         $response = json_decode($this->client->getResponse()->getContent(), true);
 
-        $this->assertEquals(422, $this->client->getResponse()->getStatusCode());
+        $this->assertResponseStatusCodeSame(422);
         $this->assertContains('This value should not be null.', $response['errors']['title']);
 
     }
@@ -646,6 +648,34 @@ class PostTest extends BaseTestBundle
         $admin);
 
         $this->assertResponseStatusCodeSame(204);
+    }
+
+    public function testAdminCanApprovePost()
+    {
+        $data = [
+            'name' => 'John Doe',
+            'email' => 'johndoe@gmail.com',
+            'password' => '$argon2id$v=19$m=65536,t=4,p=1$eTBDS3FZaURtcFJhbDNKbA$k60/BHW65f2Xg8x8yPFyEUXcnwnSkZc8A4UXv39KZU4',
+            'roles' => ['ROLE_ADMIN']
+        ];
+
+
+        $admin = $this->authorize($data);
+
+        $user = $this->authorize();
+
+        $post = $this->postWithImageAndTagsApproved($user);
+
+        $approve = [ 'approved' => 1];
+
+        $this->client->request('POST', "admin/post/{$post['data']['id']}/approval",
+        [],
+        [],
+        $admin,
+        json_encode($approve));
+
+        $this->assertResponseStatusCodeSame(200);
+
     }
 
 }
