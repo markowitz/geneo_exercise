@@ -22,9 +22,11 @@
   - copy .env.example to .env and edit your database information
   - run ```docker-compose up -d``` to build the docker image.
   - bash into the docker container ```docker exec -it geneo.app bash```
+  - run ``` composer install```
   - run ```php bin/console doctrine:migrations:migrate``` to run migration and add ```--env=test``` flag for test migration
   - if you have issues with migrating the env test, run ```php bin/console doctrine:database:create --env=test```
   - ```php bin/console doctrine:fixtures:load``` to load data fixtures add the test env flag to load for test db
+  - run ``` bin/console lexik:jwt:generate-keypair``` to generate jwt key
   - an admin account is setup already with detail
   - email: admin@geneo.com
   - password: password
@@ -110,11 +112,35 @@
        ```
        
    - GET ```/api/post/{slug}``` show single post
-   - POST ```/api/post/{post}/comment ``` post comment
+   - POST ```/api/post/{post}/comment ``` post comment 
+         
+         ```
+            curl --location --request POST '0.0.0.0:43219/api/post/18/comment' \
+              --header 'Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpYXQiOjE2MTU4MjkyOTcsImV4cCI6MTYxNTgzMjg5Nywicm9sZXMiOlsiUk9MRV9VU0VSIiwiUk9MRV9BRE1JTiJdLCJ1c2VybmFtZSI6Imljbndha2FubWErMTNAZ21haWwuY29tIn0.nl0HcaVH0a-JlApvdqLuxjgZe_Llxp9dnJV-Y1_DpRBsOQpnBZNkN76uZiWnh_PHWS_2NzKL9LqMu2J_XwXKa1mdlG0kbG6ikk8CDwU0NN_KSIA34Md7ZPL7wlTiDIKUyos6bWSvjj1heiSNlYcGwY28EBXSzX1PjUzO9e85W5tpSkk-lcbZ8D5fHF2GsPnHxiATPYd3zSG0u9wV6LPnUsq5ethin2QFgIQmoD17g_E5oXDwqKCbXRiI7d4XmNDGQy9PaHXJuzJS3I6665RRiCETE-aGNtWpMRfL-teU4N3vq51xtsy9yRUFN4GdV6Ot61-2BaMVBGPW6frRMvJMAw' \
+              --header 'Content-Type: application/json' \
+              --data-raw '{
+                  "comment": "omo mad oo"
+              }'
+              
+           ```
    - POST ```/api/following/{id} ``` endpoint to follow user
    - GET ```/api/user/posts ``` show users posts
    - DELETE ```/api/admin/user/{user}``` delete user
    - POST ```/api/admin/post/{id}/approval ``` approve post
+    
+        ```
+          curl --location --request POST '0.0.0.0:43219/api/post/19/approval' \
+          --header 'Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpYXQiOjE2MTU4MjkyOTcsImV4cCI6MTYxNTgzMjg5Nywicm9sZXMiOlsiUk9MRV9VU0VSIiwiUk9MRV9BRE1JTiJdLCJ1c2VybmFtZSI6Imljbndha2FubWErMTNAZ21haWwuY29tIn0.nl0HcaVH0a-JlApvdqLuxjgZe_Llxp9dnJV-Y1_DpRBsOQpnBZNkN76uZiWnh_PHWS_2NzKL9LqMu2J_XwXKa1mdlG0kbG6ikk8CDwU0NN_KSIA34Md7ZPL7wlTiDIKUyos6bWSvjj1heiSNlYcGwY28EBXSzX1PjUzO9e85W5tpSkk-lcbZ8D5fHF2GsPnHxiATPYd3zSG0u9wV6LPnUsq5ethin2QFgIQmoD17g_E5oXDwqKCbXRiI7d4XmNDGQy9PaHXJuzJS3I6665RRiCETE-aGNtWpMRfL-teU4N3vq51xtsy9yRUFN4GdV6Ot61-2BaMVBGPW6frRMvJMAw' \
+          --header 'Content-Type: application/json' \
+          --data-raw '{
+              "approved": 1
+          }'
+          ```
+          
   
+  
+  ## Note
+  
+   - Test Coverage is 90% for the functional tests
 
  
