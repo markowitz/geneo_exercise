@@ -129,12 +129,12 @@
    - POST ```/api/admin/post/{id}/approval ``` approve post
     
         ```
-          curl --location --request POST '0.0.0.0:43219/api/post/19/approval' \
-          --header 'Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpYXQiOjE2MTU4MjkyOTcsImV4cCI6MTYxNTgzMjg5Nywicm9sZXMiOlsiUk9MRV9VU0VSIiwiUk9MRV9BRE1JTiJdLCJ1c2VybmFtZSI6Imljbndha2FubWErMTNAZ21haWwuY29tIn0.nl0HcaVH0a-JlApvdqLuxjgZe_Llxp9dnJV-Y1_DpRBsOQpnBZNkN76uZiWnh_PHWS_2NzKL9LqMu2J_XwXKa1mdlG0kbG6ikk8CDwU0NN_KSIA34Md7ZPL7wlTiDIKUyos6bWSvjj1heiSNlYcGwY28EBXSzX1PjUzO9e85W5tpSkk-lcbZ8D5fHF2GsPnHxiATPYd3zSG0u9wV6LPnUsq5ethin2QFgIQmoD17g_E5oXDwqKCbXRiI7d4XmNDGQy9PaHXJuzJS3I6665RRiCETE-aGNtWpMRfL-teU4N3vq51xtsy9yRUFN4GdV6Ot61-2BaMVBGPW6frRMvJMAw' \
-          --header 'Content-Type: application/json' \
-          --data-raw '{
-              "approved": 1
-          }'
+          curl --location --request POST '0.0.0.0:43219/api/admin/post/1/approval' \
+            --header 'Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpYXQiOjE2MTU5ODMwMzIsImV4cCI6MTYxNTk4NjYzMiwicm9sZXMiOlsiUk9MRV9VU0VSIl0sInVzZXJuYW1lIjoiam9obkBhYmMuY29tIn0.bTS5MEMSnz0Xjo64wgL7KTWB9lOFKGL0Xh6tmKEQj2-gjw0w2byZTNWAlqcfXC3RliSOhqg3dM5C4NATzopm6imHLgm-OvNVVmpW5dg4PB-4zUzmelvtSpD1M_GnR_mCa_JBkeA92ng1pEOO_lGfmrKia1qQELtcszpyypiXxz45ZDxwPHbbS8xW8buahvqL296RY91QAb2sWa-Wf7O3dqBLwotF4KglabyS6vBVChvriTGk13MLyBg5c5IVp-MKhHBdMwWD0mu1EO53I_msafORbcqX_SbMxBKFzkq4C_yXK-qy8JwXmmln88xSyPVpkm8euXF3d0fZPdpbypw_FQ' \
+            --header 'Content-Type: application/json' \
+            --data-raw '{
+                "approved": 1
+            }'
           ```
           
   
