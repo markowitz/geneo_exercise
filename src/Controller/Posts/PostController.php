@@ -3,7 +3,6 @@
 namespace App\Controller\Posts;
 
 use App\Controller\BaseController;
-use App\Dto\ApprovalRequest;
 use App\Dto\Transformer\PostTransformer;
 use App\Entity\Post;
 use App\Entity\User;
@@ -36,7 +35,7 @@ class PostController extends BaseController
     }
 
     /**
-     * @Route("/api/post", name="api_post", methods={"POST"})
+     * @Route("/api/post", name="create_post", methods={"POST"})
      */
     public function create(Request $request)
     {
@@ -83,50 +82,6 @@ class PostController extends BaseController
 
     }
 
-
-    /**
-     * @Route("/api/post/{id}/approval", name="pending_posts", methods={"POST"})
-     */
-    public function approval(Request $request, Post $post)
-    {
-
-        $this->denyAccessUnlessGranted(User::ADMIN);
-
-        try {
-
-            $post = $this->postRepo->findOneBy(['slug' => $post->getSlug()]);
-
-        } catch(\Throwable $e) {
-
-            throw $this->createNotFoundException('page not found');
-        }
-
-        $request = $this->transformJsonBody($request);
-
-        $dto = $this->serviceRequest($request, ApprovalRequest::class);
-
-        $errors = $this->validator->validate($dto);
-
-        if (count($errors)) {
-            return $this->json([
-                    'message' =>  'Validation Error',
-                    'errors' => $this->validationErrorResponse($errors)
-                ], Response::HTTP_UNPROCESSABLE_ENTITY);
-        }
-
-        try {
-
-            $this->postRepo->approval($post, $dto->approved);
-
-        } catch(\Exception $e) {
-            throw new HttpException($e->getMessage());
-        }
-
-        return $this->json([
-            'message' => "post approved successfully"
-        ], Response::HTTP_OK);
-    }
-
     /**
      * @Route("/api/post/{id}/edit", name="edit_post", methods={"POST"})
      */
@@ -153,20 +108,6 @@ class PostController extends BaseController
         }
 
         return $this->json(null, Response::HTTP_NO_CONTENT);
-    }
-
-    /**
-     * @Route("/api/posts/pending", name="pending_posts", methods={"GET"})
-     */
-    public function fetchAllPendingPosts()
-    {
-        $this->denyAccessUnlessGranted(User::ADMIN);
-        $posts = $this->postRepo->fetchAllPendingPosts();
-        $posts = $this->postTransformer->transformFromObjects($posts);
-
-        return $this->json([
-            'data' => $posts
-        ], Response::HTTP_OK);
     }
 
 

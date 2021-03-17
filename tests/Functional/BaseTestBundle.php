@@ -15,6 +15,7 @@ class BaseTestBundle extends WebTestCase
 
     protected function setUp(): void
     {
+
         $this->client = static::createClient();
         $this->faker = Factory::create();
         $kernel = self::bootKernel();
@@ -22,6 +23,13 @@ class BaseTestBundle extends WebTestCase
         $this->entityManager = $kernel->getContainer()
             ->get('doctrine')
             ->getManager();
+    }
+
+    protected function tearDown(): void
+    {
+        self::ensureKernelShutdown();
+        array_map('unlink', glob("uploads/images/*"));
+
     }
 
 
@@ -107,8 +115,4 @@ class BaseTestBundle extends WebTestCase
 
     }
 
-    protected function approvePost()
-    {
-
-    }
 }

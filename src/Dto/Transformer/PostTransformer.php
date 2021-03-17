@@ -20,6 +20,7 @@ class PostTransformer extends AbstractTransformer
         $userTransformer    = new UserTransformer();
         $imageTransformer   = new ImageTransformer();
         $tagTransformer     = new TagTransformer();
+        $postCommentTransformer = new PostCommentTransformer();
 
         $dto->id           = $post->getId();
         $dto->title        = $post->getTitle();
@@ -27,8 +28,9 @@ class PostTransformer extends AbstractTransformer
         $dto->author       = $userTransformer->transformFromObject($post->getAuthor());
         $dto->images       = $imageTransformer->transformFromObject($post->getImages());
         $dto->tags         = $tagTransformer->transformFromObjects($post->getTags());
+        $dto->comments     = $postCommentTransformer->transformFromObjects($post->getPostComments());
         $dto->slug         = $post->getSlug();
-        $dto->is_published = $post->getIsPublished();
+        $dto->approved     = $post->getApproved();
         $dto->createdAt    = $post->getCreatedAt();
         $dto->updatedAt    = $post->getUpdatedAt();
 

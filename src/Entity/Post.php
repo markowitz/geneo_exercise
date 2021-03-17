@@ -69,7 +69,7 @@ class Post
     /**
      * @ORM\Column(type="boolean")
      */
-    private $is_published = 0;
+    private $approved = 0;
 
     /**
      * @ORM\OneToMany(targetEntity=PostComment::class, mappedBy="post", orphanRemoval=true)
@@ -196,14 +196,14 @@ class Post
         return $this;
     }
 
-    public function getIsPublished(): ?bool
+    public function getApproved(): ?bool
     {
-        return $this->is_published;
+        return $this->approved;
     }
 
-    public function setIsPublished(bool $is_published): self
+    public function setApproved(bool $approved): self
     {
-        $this->is_published = $is_published;
+        $this->approved = $approved;
 
         return $this;
     }

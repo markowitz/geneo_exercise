@@ -63,13 +63,13 @@ class PostVoter extends Voter
 
         return ($post->getAuthor() === $user )||
                 ($user->getFollowing()->contains($post->getAuthor())
-                    && $post->getIsPublished());
+                    && $post->getApproved());
 
     }
 
     protected function canEdit(Post $post, User $user)
     {
-        return $user === $post->getAuthor() && !$post->getIsPublished();
+        return $user === $post->getAuthor() && !$post->getApproved();
     }
 
     protected function canDelete(Post $post, User $user)

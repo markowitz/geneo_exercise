@@ -34,7 +34,7 @@ class PostRequest
 
     public $slug;
 
-    public $is_published;
+    public $approved;
 
     public $createdAt;
 

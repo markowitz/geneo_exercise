@@ -36,29 +36,9 @@ class UserController extends AbstractController
     }
 
     /**
-     * @Route("/api/user/delete/{user}", name="api_user")
+     * @Route("/api/user/posts")
      */
-    public function delete(User $user)
-    {
-        $this->denyAccessUnlessGranted(User::ADMIN);
-
-        try {
-
-            $this->userRepo->delete($user);
-
-        } catch(\Exception $e) {
-            throw new HttpException(Response::HTTP_BAD_REQUEST, $e->getMessage());
-        }
-
-        return $this->json(null, Response::HTTP_NO_CONTENT);
-
-
-    }
-
-    /**
-     * @Route("/api/user/posts", "api_user_posts")
-     */
-    public function fetchPendingPosts()
+    public function fetchUserPendingPosts()
     {
         $user = $this->getUser();
         $posts = $this->postRepo->fetchUserPendingPosts($user);

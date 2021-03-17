@@ -53,6 +53,7 @@ class PostTest extends BaseTestBundle
         );
 
         $this->assertEquals(201, $this->client->getResponse()->getStatusCode());
+
     }
 
     /**
@@ -78,6 +79,7 @@ class PostTest extends BaseTestBundle
         );
 
         $this->assertEquals(201, $this->client->getResponse()->getStatusCode());
+
     }
 
     /**
@@ -105,6 +107,7 @@ class PostTest extends BaseTestBundle
         $response = json_decode($this->client->getResponse()->getContent(), true);
         $this->assertEquals(422, $this->client->getResponse()->getStatusCode());
         $this->assertContains('This value should not be blank.', $response['errors']['title']);
+
     }
 
     /**
@@ -133,6 +136,7 @@ class PostTest extends BaseTestBundle
 
         $this->assertEquals(422, $this->client->getResponse()->getStatusCode());
         $this->assertContains('This value is too short. It should have 3 characters or more.', $response['errors']['title']);
+
     }
 
     /**
@@ -161,6 +165,7 @@ class PostTest extends BaseTestBundle
 
         $this->assertEquals(422, $this->client->getResponse()->getStatusCode());
         $this->assertContains('This value should not be null.', $response['errors']['title']);
+
     }
 
     /**
@@ -188,6 +193,7 @@ class PostTest extends BaseTestBundle
         $response = json_decode($this->client->getResponse()->getContent(), true);
         $this->assertEquals(422, $this->client->getResponse()->getStatusCode());
         $this->assertContains('This value should not be blank.', $response['errors']['content']);
+
     }
 
     /**
@@ -216,6 +222,7 @@ class PostTest extends BaseTestBundle
 
         $this->assertEquals(422, $this->client->getResponse()->getStatusCode());
         $this->assertContains('This value is too short. It should have 8 characters or more.', $response['errors']['content']);
+
     }
 
     /**
@@ -244,6 +251,7 @@ class PostTest extends BaseTestBundle
 
         $this->assertEquals(422, $this->client->getResponse()->getStatusCode());
         $this->assertContains('This value should not be null.', $response['errors']['content']);
+
     }
 
     /**
@@ -272,6 +280,7 @@ class PostTest extends BaseTestBundle
 
         $this->assertEquals(422, $this->client->getResponse()->getStatusCode());
         $this->assertContains('This value should be of type string.', $response['errors']['tags']);
+
     }
 
     /**
@@ -287,7 +296,7 @@ class PostTest extends BaseTestBundle
 
         $postRepo = $repo->findOneBy(['id' => $post['data']['id']]);
 
-        $postRepo->setIsPublished(1);
+        $postRepo->setApproved(1);
 
         $this->entityManager->persist($postRepo);
         $this->entityManager->flush();
@@ -302,6 +311,7 @@ class PostTest extends BaseTestBundle
         $this->assertResponseStatusCodeSame(200);
 
         $this->assertCount(1, $response['data']);
+
 
     }
 
@@ -364,7 +374,7 @@ class PostTest extends BaseTestBundle
 
         $postRepo = $repo->findOneBy(['id' => $post['data']['id']]);
 
-        $postRepo->setIsPublished(1);
+        $postRepo->setApproved(1);
 
         $this->entityManager->persist($postRepo);
         $this->entityManager->flush();
@@ -393,7 +403,7 @@ class PostTest extends BaseTestBundle
 
         $postRepo = $repo->findOneBy(['id' => $post['data']['id']]);
 
-        $postRepo->setIsPublished(1);
+        $postRepo->setApproved(1);
 
         $this->entityManager->persist($postRepo);
         $this->entityManager->flush();
@@ -434,6 +444,7 @@ class PostTest extends BaseTestBundle
         $this->assertResponseStatusCodeSame(200);
 
         $this->assertArrayHasKey("title", $response['data']);
+
     }
 
     public function testUserCannotViewSingleUnpublishedPostIfNotAuthor()
@@ -465,6 +476,7 @@ class PostTest extends BaseTestBundle
         $response = json_decode($this->client->getResponse()->getContent(), true);
 
         $this->assertResponseStatusCodeSame(403);
+
     }
 
     public function testUserCannotViewSinglePublishedPostIfNotFollowingAuthor()
@@ -483,7 +495,7 @@ class PostTest extends BaseTestBundle
 
         $postRepo = $repo->findOneBy(['id' => $post['data']['id']]);
 
-        $postRepo->setIsPublished(1);
+        $postRepo->setApproved(1);
 
         $this->entityManager->persist($postRepo);
         $this->entityManager->flush();
@@ -498,6 +510,7 @@ class PostTest extends BaseTestBundle
         $response = json_decode($this->client->getResponse()->getContent(), true);
 
         $this->assertResponseStatusCodeSame(403);
+
     }
 
     public function testUserCanViewSinglePublishedPostOfUsersTheyFollow()
@@ -526,7 +539,7 @@ class PostTest extends BaseTestBundle
 
         $postRepo = $repo->findOneBy(['id' => $post['data']['id']]);
 
-        $postRepo->setIsPublished(1);
+        $postRepo->setApproved(1);
 
         $this->entityManager->persist($postRepo);
         $this->entityManager->flush();
@@ -541,6 +554,7 @@ class PostTest extends BaseTestBundle
         $this->assertResponseStatusCodeSame(200);
 
         $this->assertArrayHasKey("title", $response['data']);
+
     }
 
     public function testAdminCanFetchAllPendingPosts()
@@ -559,7 +573,7 @@ class PostTest extends BaseTestBundle
 
         $this->postWithImageAndTagsApproved($user);
 
-        $this->client->request('GET', '/api/posts/pending',
+        $this->client->request('GET', '/api/admin/pending-posts',
         [],
         [],
         $admin);
@@ -568,6 +582,7 @@ class PostTest extends BaseTestBundle
         $this->assertResponseStatusCodeSame(200);
 
         $this->assertGreaterThan(0, $response['data']);
+
     }
 
     public function testAuthorCanDeletePost()
@@ -582,6 +597,7 @@ class PostTest extends BaseTestBundle
         $header);
 
         $this->assertResponseStatusCodeSame(204);
+
     }
 
     public function testUserCannotDeletePostIfNotOwner()
@@ -592,7 +608,7 @@ class PostTest extends BaseTestBundle
             'password' => '$argon2id$v=19$m=65536,t=4,p=1$eTBDS3FZaURtcFJhbDNKbA$k60/BHW65f2Xg8x8yPFyEUXcnwnSkZc8A4UXv39KZU4'
         ];
 
-        $user = $this->register($data);
+        $this->register($data);
 
         $authUser = $this->authorize();
 
@@ -606,7 +622,6 @@ class PostTest extends BaseTestBundle
         $authUser);
 
         $this->assertResponseStatusCodeSame(403);
-
     }
 
     public function testAdminCanDeletePost()

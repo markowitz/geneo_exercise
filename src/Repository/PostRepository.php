@@ -64,7 +64,7 @@ class PostRepository extends ServiceEntityRepository
         if (!in_array(User::ADMIN, $user->getRoles())) {
          $query =   $query->join('post.author', 'user')
                         ->leftJoin('user.followers', 'uf')
-                        ->where('post.is_published = 1')
+                        ->where('post.approved = 1')
                         ->andWhere('user = :user OR post.author IN(:userfollowing)')
                         ->setParameter('user', $user)
                         ->setParameter('userfollowing', $user->getFollowing());
@@ -86,7 +86,7 @@ class PostRepository extends ServiceEntityRepository
         $query = $this->createQueryBuilder('post')
                         ->select('post')
                         ->where('post.slug = :slug')
-                        ->where('post.is_published = 1')
+                        ->where('post.approved = 1')
                         ->setParameter('slug', $slug)
                         ->getQuery()
                         ->getOneOrNullResult();
@@ -102,7 +102,7 @@ class PostRepository extends ServiceEntityRepository
     {
         $query = $this->createQueryBuilder('post')
                         ->select('post')
-                        ->where('post.is_published = 0')
+                        ->where('post.approved = 0')
                         ->orderBy('post.created_at', 'DESC')
                         ->getQuery()
                         ->getResult();
@@ -119,7 +119,7 @@ class PostRepository extends ServiceEntityRepository
     {
         $query = $this->createQueryBuilder('post')
                         ->select('post')
-                        ->where('post.is_published = 0')
+                        ->where('post.approved = 0')
                         ->andWhere('post.author = :user')
                         ->setParameter('user', $user)
                         ->orderBy('post.created_at', 'DESC')
@@ -136,7 +136,7 @@ class PostRepository extends ServiceEntityRepository
      */
     public function approval(Post $post, $status)
     {
-        $post->setIsPublished($status);
+        $post->getApproved($status);
 
         $this->_em->persist($post);
         $this->_em->flush();

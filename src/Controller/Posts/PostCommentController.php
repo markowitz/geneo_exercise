@@ -40,7 +40,7 @@ class PostCommentController extends BaseController
      */
     public function create(Request $request, Post $post): Response
     {
-        $this->denyAccessUnlessGranted('create', $post);
+        $this->denyAccessUnlessGranted('view', $post);
 
         $request = $this->transformJsonBody($request);
 
