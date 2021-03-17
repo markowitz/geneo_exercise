@@ -19,6 +19,13 @@ class PostCommentRepository extends ServiceEntityRepository
         parent::__construct($registry, PostComment::class);
     }
 
+    /**
+     * create a comment
+     * @param Object $post
+     * @param Object $dto
+     * @param Object $user
+     * @return Comment $comment
+     */
     public function create(Object $post, Object $dto, Object $user)
     {
         $comment = new PostComment();

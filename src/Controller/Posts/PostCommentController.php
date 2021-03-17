@@ -44,8 +44,8 @@ class PostCommentController extends AbstractController
     public function __construct(RequestService $requestService,
                                 ValidatorInterface $validator,
                                 PostCommentRepository $postCommentRepo,
-                                PostCommentTransformer $postCommentTransformer)
-    {
+                                PostCommentTransformer $postCommentTransformer) {
+
         $this->requestService  = $requestService;
         $this->validator  = $validator;
         $this->postCommentRepo = $postCommentRepo;

@@ -206,7 +206,7 @@ class PostRepository extends ServiceEntityRepository
                 $this->_em->persist($tag);
             }
         }
-}
+    }
 
     /**
      * delete post
