@@ -1,5 +1,7 @@
 # GENEO TEST
 
+ This is a simple social networking app, where users can register and follow each other, make posts and comment on posts of users they follow.
+ 
 ## Tasks
   
   - Endpoint to register users, based on email and password. Email validation is mandatory. Password requirements should be implemented.
@@ -112,7 +114,7 @@
        ```
        
    - GET ```/api/post/{slug}``` show single post
-   - POST ```/api/post/{post}/comment ``` post comment 
+   - POST ```/api/post/{id}/comment ``` post comment 
          
          ```
             curl --location --request POST '0.0.0.0:43219/api/post/18/comment' \
@@ -125,7 +127,7 @@
            ```
    - POST ```/api/following/{id} ``` endpoint to follow user
    - GET ```/api/user/posts ``` show users posts
-   - DELETE ```/api/admin/user/{user}``` delete user
+   - DELETE ```/api/admin/user/{id}``` delete user
    - POST ```/api/admin/post/{id}/approval ``` approve post
     
         ```
@@ -137,10 +139,9 @@
             }'
           ```
           
-  
+  - GET ``` /api/posts``` fetches all approved posts
   
   ## Note
   
-   - Test Coverage is 90% for the functional tests
-
+   - Test Coverage is 70% 
  
