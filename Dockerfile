@@ -19,7 +19,3 @@ ADD ./nginx-supervisor.ini /etc/supervisor/conf.d/nginx-supervisor.ini
 COPY nginx.conf /etc/nginx/nginx.conf
 
 WORKDIR /var/www
-
-COPY ./composer.* /var/www/
-
-RUN composer install
