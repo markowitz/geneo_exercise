@@ -1,5 +1,7 @@
 # GENEO TEST
 
+ This is a simple social networking app, where users can register and follow each other, make posts and comment on posts of users they follow.
+ 
 ## Tasks
   
   - Endpoint to register users, based on email and password. Email validation is mandatory. Password requirements should be implemented.
@@ -141,6 +143,5 @@
   
   ## Note
   
-   - Test Coverage is 90% for the functional tests
-
+   - Test Coverage is 70% 
  
