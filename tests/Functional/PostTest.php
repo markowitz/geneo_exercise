@@ -672,4 +672,30 @@ class PostTest extends BaseTestBundle
 
     }
 
+    public function testAuthorCanEditUnPublishedPost()
+    {
+        $user = $this->authorize();
+
+        $post = $this->postWithImageAndTagsApproved($user);
+
+        $newPost = [
+            'title' => 'This is a new title',
+            'content' => 'Well this content is unique'
+        ];
+
+        $this->client->request('POST', "post/{$post['data']['id']}/edit",
+            [],
+            [],
+            $user,
+            json_encode($newPost)
+          );
+
+          $this->assertResponseStatusCodeSame(200);
+
+          $response = json_decode($this->client->getResponse()->getContent(), true);
+
+          $this->assertNotEquals($post['data']['title'], $response['data']['title']);
+
+    }
+
 }

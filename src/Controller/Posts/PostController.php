@@ -8,6 +8,7 @@ use App\Repository\PostRepository;
 use App\Dto\{PostRequest, ImageRequest};
 use App\Controller\Traits\ControllersTrait;
 use App\Dto\Transformer\PostTransformer;
+use App\Services\ImageUploader;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\{Request, Response};
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -37,16 +38,23 @@ class PostController extends AbstractController
      */
     private $validator;
 
+    /**
+     * @var ImageUploader
+     */
+    private $imageUploader;
+
 
     public function __construct(RequestService $requestService,
                                 ValidatorInterface $validator,
                                 PostRepository $postRepo,
-                                PostTransformer $postTransformer) {
+                                PostTransformer $postTransformer,
+                                ImageUploader $imageUploader) {
 
         $this->requestService = $requestService;
         $this->validator = $validator;
         $this->postRepo = $postRepo;
         $this->postTransformer = $postTransformer;
+        $this->imageUploader = $imageUploader;
     }
 
     /**
@@ -59,21 +67,22 @@ class PostController extends AbstractController
 
         $postRequestDto = $this->requestService->mapContent($requestBody, PostRequest::class);
 
-        $imageDtos = $this->imageDtos($request);
-
         $errors =   $this->validator->validate($postRequestDto);
 
         if (count($errors)) {
-
-            $this->unlinkImages($imageDtos);
-
             return $this->json([
                     'message' =>  'Validation Error',
                     'errors' => $this->validationErrorResponse($errors)
                 ], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-        $post = $this->postRepo->create($postRequestDto, $this->getUser(), $imageDtos);
+        $imageFilePaths = [];
+
+        if ($postRequestDto->images) {
+            $imageFilePaths = $this->imageUploader->handleUpload($postRequestDto->images);
+        }
+
+        $post = $this->postRepo->create($postRequestDto, $this->getUser(), $imageFilePaths);
 
         $post = $this->postTransformer->transformFromObject($post);
 
@@ -101,15 +110,11 @@ class PostController extends AbstractController
 
         $requestBody = $this->transformJsonBody($request);
 
-        $dto = $this->requestService->mapContent($requestBody, PostRequest::class);
+        $postRequestDto = $this->requestService->mapContent($requestBody, PostRequest::class);
 
-        $imageDtos = $this->imageDtos($request);
-
-        $errors =   $this->validator->validate($dto);
+        $errors =   $this->validator->validate($postRequestDto);
 
         if (count($errors)) {
-
-            $this->unlinkImages($imageDtos);
 
             return $this->json([
                     'message' =>  'Validation Error',
@@ -117,13 +122,19 @@ class PostController extends AbstractController
                 ], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-        $post = $this->postRepo->update($post, $dto, $this->getUser(), $imageDtos);
+        $imageFilePaths = [];
+
+        if ($postRequestDto->images) {
+            $imageFilePaths = $this->imageUploader->handleUpload($postRequestDto->images);
+        }
+
+        $post = $this->postRepo->update($post, $postRequestDto, $this->getUser(), $imageFilePaths);
         $post = $this->postTransformer->transformFromObject($post);
 
         return $this->json([
             'message' => "post updated successfully",
             'data' => $post
-        ], Response::HTTP_CREATED);
+        ], Response::HTTP_OK);
 
     }
 
@@ -191,41 +202,6 @@ class PostController extends AbstractController
 
         return $this->json(null, Response::HTTP_NO_CONTENT);
     }
-
-    /**
-     * Unlink Images
-     * @param array $imageDtos
-     */
-    protected function unlinkImages($imageDtos) {
-
-        if (count($imageDtos)) {
-
-            array_walk($imageDtos, function($imageDto) {
-                unlink('uploads/images/'.$imageDto->file_name);
-            });
-
-        }
-    }
-
-     /**
-      * handles the image request
-     * @param Request $request
-     * @return Array $imageDtos
-     */
-    protected function imageDtos($request)
-    {
-        $imageDtos = [];
-
-        if ($request->get('images') || $request->files->count() > 0) {
-
-            $request = $request->get('images') ?? $request->files->all()['images'];
-
-            $imageDtos = $this->requestService->mapRequestToFiles($request, ImageRequest::class);
-        }
-
-        return $imageDtos;
-    }
-
 
 }
 

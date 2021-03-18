@@ -2,6 +2,9 @@
 
 namespace App\Controller\Traits;
 
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
+
 trait ControllersTrait
 {
      /**
@@ -11,14 +14,13 @@ trait ControllersTrait
      */
     public function transformJsonBody($request)
     {
-        if ($request->getContentType() == 'json') {
+        if ($request->getContentType() !== 'json') {
 
-            $data = json_decode($request->getContent(), true);
+            throw new HttpException(Response::HTTP_UNSUPPORTED_MEDIA_TYPE);
 
-            $request->request->replace($data);
         }
 
-        return $request;
+        return $request->getContent();
     }
 
     /**

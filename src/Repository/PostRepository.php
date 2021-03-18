@@ -175,9 +175,10 @@ class PostRepository extends ServiceEntityRepository
         }
 
         foreach($images as $image) {
+
             $newImage = new Images();
-            $newImage->setFileName($image->file_name);
-            $newImage->setFilePath($image->file_path);
+            $newImage->setFileName($image['file_name']);
+            $newImage->setFilePath($image['file_path']);
             $post->addImage($newImage);
             $this->_em->persist($newImage);
 
