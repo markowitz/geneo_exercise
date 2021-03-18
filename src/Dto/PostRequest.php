@@ -25,31 +25,50 @@ class PostRequest
 
     public $author;
 
+    /**
+     * @Assert\Type(type={"array", "string"})
+     */
     public $images = [];
+
+    /**
+     * @Assert\Type(type={"array", "string"})
+     */
+    public $tags;
 
     /**
      * @Assert\Type("string")
      */
-    public $tags;
-
     public $slug;
 
+    /**
+     * @Assert\Type(type={"bool", "integer"})
+     */
     public $approved;
 
     public $createdAt;
 
     public $updatedAt;
 
+    /**
+     * persist Tags
+     * @param array | string $value
+     * @return Array $tags
+     */
     public function postTags($value)
     {
-        $names = array_unique(array_filter(array_map('trim', explode(',',$value))));
+
+        if (!is_array($value)) {
+            $names = array_unique(array_filter(array_map('trim', explode(',',$value))));
+        } else {
+            $names = $value;
+        }
 
         $tags = [];
 
         foreach($names as $name) {
             $tag = new Tag();
             $tag->setName($name);
-            $tags[]=$tag;
+            $tags[] = $tag;
         }
 
         return $tags;

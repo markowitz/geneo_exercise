@@ -26,10 +26,10 @@ class RequestService
     /**
      * @param Request $request
      * @param Object $className
+     * @return Object $dto
      */
     public function mapContent($request, $className)
     {
-
         $dto = $this->serializer->deserialize(
                 json_encode($request->request->all()),
                 $className,
@@ -37,9 +37,14 @@ class RequestService
         );
 
         return $dto;
-
     }
 
+    /**
+     * map request to files
+     * @param String | Array $content
+     * @param String $className
+     * @return Array $dtos
+     */
     public function mapRequestToFiles($content, $className)
     {
 
@@ -59,6 +64,11 @@ class RequestService
 
     }
 
+    /**
+     * handles file request and upload
+     * @param String | Array $request
+     * @return Array $dto
+     */
     protected function handleFileRequest($request)
     {
         $dto = [];

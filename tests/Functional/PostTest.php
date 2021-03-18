@@ -256,35 +256,6 @@ class PostTest extends BaseTestBundle
     }
 
     /**
-     * tags must be a string
-     */
-    public function testTagsMustBeAString()
-    {
-        $headers = $this->authorize();
-
-        $post = [
-            "title" => $this->faker->name,
-            "content" => null,
-            "images" => base64_encode(file_get_contents($this->faker->imageUrl(640, 480, 'animals', true))),
-            'tags' => ['lagos, benin']
-        ];
-
-        $this->client->request('POST', 'post',
-            [],
-            [],
-            $headers,
-            json_encode($post)
-        );
-
-        $response = json_decode($this->client->getResponse()->getContent(), true);
-
-        $this->assertResponseStatusCodeSame(422);
-
-        $this->assertContains('This value should be of type string.', $response['errors']['tags']);
-
-    }
-
-    /**
      * test to show approved posts for auth user and followings
      */
     public function testToShowApprovedPosts()

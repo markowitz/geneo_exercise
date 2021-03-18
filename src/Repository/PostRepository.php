@@ -132,7 +132,7 @@ class PostRepository extends ServiceEntityRepository
     /**
      * approve/disapprove a post
      * @param Post $post
-     * @param String $status
+     * @param int | boolean $status
      */
     public function approval(Post $post, $status)
     {
