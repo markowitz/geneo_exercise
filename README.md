@@ -114,7 +114,7 @@
        ```
        
    - GET ```/api/post/{slug}``` show single post
-   - POST ```/api/post/{post}/comment ``` post comment 
+   - POST ```/api/post/{id}/comment ``` post comment 
          
          ```
             curl --location --request POST '0.0.0.0:43219/api/post/18/comment' \
@@ -127,7 +127,7 @@
            ```
    - POST ```/api/following/{id} ``` endpoint to follow user
    - GET ```/api/user/posts ``` show users posts
-   - DELETE ```/api/admin/user/{user}``` delete user
+   - DELETE ```/api/admin/user/{id}``` delete user
    - POST ```/api/admin/post/{id}/approval ``` approve post
     
         ```
