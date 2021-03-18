@@ -16,7 +16,7 @@ trait ControllersTrait
     {
         if ($request->getContentType() !== 'json') {
 
-            throw new HttpException(Response::HTTP_UNSUPPORTED_MEDIA_TYPE);
+            throw new HttpException(Response::HTTP_UNSUPPORTED_MEDIA_TYPE, 'only accepts content-type application/json');
 
         }
 
