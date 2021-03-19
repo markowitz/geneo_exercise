@@ -125,7 +125,8 @@
               }'
               
            ```
-   - POST ```/api/following/{id} ``` endpoint to follow user
+   - POST ```/api/follow/{id} ``` endpoint to follow user
+   - POST ```/api/unfollow/{id} ``` endpoint to unfollow user
    - GET ```/api/user/posts ``` show users posts
    - DELETE ```/api/admin/user/{id}``` delete user
    - POST ```/api/admin/post/{id}/approval ``` approve post
