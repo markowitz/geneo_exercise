@@ -5,9 +5,10 @@ namespace App\Controller\Posts;
 use App\Entity\Post;
 use App\Services\RequestService;
 use App\Repository\PostRepository;
-use App\Dto\{PostRequest, ImageRequest};
+use App\Dto\{PostRequest, ApprovalRequest};
 use App\Controller\Traits\ControllersTrait;
 use App\Dto\Transformer\PostTransformer;
+use App\Entity\User;
 use App\Services\ImageUploader;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\{Request, Response};
@@ -96,15 +97,8 @@ class PostController extends AbstractController
       * edit post
      * @Route("/api/post/{id}/edit", name="edit_post", methods={"POST"})
      */
-    public function edit(Request $request, $id)
+    public function edit(Request $request, Post $post)
     {
-        $post = $this->postRepo->find($id);
-
-        if (!$post) {
-            return $this->json([
-                'message' => 'post not found'
-            ], Response::HTTP_NOT_FOUND);
-        }
 
         $this->denyAccessUnlessGranted('edit', $post);
 
@@ -139,7 +133,7 @@ class PostController extends AbstractController
     }
 
     /**
-     * fetch posts
+     * fetch all approved posts
      * @Route("/api/posts", name="api_posts", methods={"GET"})
     */
     public function fetchPosts()
@@ -185,22 +179,72 @@ class PostController extends AbstractController
      * delete post
      * @Route("/api/post/{id}", name="delete_post", methods={"DELETE"})
      */
-    public function delete($id)
+    public function delete(Post $post)
     {
-        $post = $this->postRepo->find($id);
-
-        if (!$post) {
-
-            return $this->json([
-                'message' => 'post not found'
-            ], Response::HTTP_NOT_FOUND);
-        }
-
         $this->denyAccessUnlessGranted('delete', $post);
 
         $this->postRepo->delete($post);
 
         return $this->json(null, Response::HTTP_NO_CONTENT);
+    }
+
+     /**
+      * approve a post
+     * @Route("/api/admin/post/{id}/approval", name="approve_post", methods={"POST"})
+     */
+    public function approval(Request $request, Post $post)
+    {
+
+        $this->denyAccessUnlessGranted(User::ADMIN);
+
+        $request = $this->transformJsonBody($request);
+
+        $dto = $this->requestService->mapContent($request, ApprovalRequest::class);
+
+        $errors = $this->validator->validate($dto);
+
+        if (count($errors)) {
+            return $this->json([
+                    'message' =>  'Validation Error',
+                    'errors' => $this->validationErrorResponse($errors)
+                ], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+
+        $this->postRepo->approval($post, $dto->approved);
+
+        return $this->json([
+            'message' => "success"
+        ], Response::HTTP_OK);
+    }
+
+    /**
+     * fetch all pending posts
+     * @Route("/api/admin/pending-posts", name="all_pending_posts", methods={"GET"})
+     */
+    public function fetchAllPendingPosts()
+    {
+        $this->denyAccessUnlessGranted(User::ADMIN);
+        $posts = $this->postRepo->fetchAllPendingPosts();
+        $posts = $this->postTransformer->transformFromObjects($posts);
+
+        return $this->json([
+            'data' => $posts
+        ], Response::HTTP_OK);
+    }
+
+    /**
+     * fetch all auth user pending posts
+     * @Route("/api/user/posts")
+     */
+    public function fetchUserPendingPosts()
+    {
+        $user = $this->getUser();
+        $posts = $this->postRepo->fetchUserPendingPosts($user);
+        $posts = $this->postTransformer->transformFromObjects($posts);
+
+        return $this->json([
+            'data' => $posts
+        ], Response::HTTP_OK);
     }
 
 }

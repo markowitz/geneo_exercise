@@ -16,7 +16,7 @@ class UserTest extends BaseTestBundle
 
         $headers = $this->authorize();
 
-        $this->client->request('POST', "following/{$user->getId()}",
+        $this->client->request('POST', "follow/{$user->getId()}",
                 [],
                 [],
                 $headers

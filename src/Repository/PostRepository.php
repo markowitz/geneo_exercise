@@ -132,9 +132,9 @@ class PostRepository extends ServiceEntityRepository
     /**
      * approve/disapprove a post
      * @param Post $post
-     * @param int | boolean $status
+     * @param int $status
      */
-    public function approval(Post $post, $status)
+    public function approval(Post $post, int $status)
     {
         $post->setApproved($status);
 
@@ -147,7 +147,7 @@ class PostRepository extends ServiceEntityRepository
      * @param Post $post
      * @param Object $dto
      * @param Object $user
-     * @param Array $imageDtos
+     * @param array $imageDtos
      * @return Post $post;
      */
     public function update(Post $post, Object $dto, Object $user, array $imageDtos)
@@ -168,7 +168,7 @@ class PostRepository extends ServiceEntityRepository
      * @param Post $post
      * @param Array $images
      */
-    public function addImages($post, $images)
+    public function addImages(Post $post, array $images)
     {
         if (!count($images)) {
             return;
@@ -188,9 +188,9 @@ class PostRepository extends ServiceEntityRepository
     /**
      * Persist tags
      * @param Post $post
-     * @param Array $tags
+     * @param array $tags
      */
-    public function addTag($post, $tags)
+    public function addTag(Post $post, array $tags)
     {
         if (!count($tags)) {
                return;
@@ -213,7 +213,7 @@ class PostRepository extends ServiceEntityRepository
      * delete post
      * @param Post $post
      */
-    public function delete($post) {
+    public function delete(Post $post) {
         $images = $post->getImages();
 
         if (count($images)) {

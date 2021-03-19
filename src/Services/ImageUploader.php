@@ -20,6 +20,8 @@ class ImageUploader
      */
     private $uploadsPath;
 
+
+
     public function __construct(ImageValidator $imageValidator, string $uploadsPath)
     {
         $this->imageValidator = $imageValidator;
@@ -38,20 +40,23 @@ class ImageUploader
         return $filePaths;
     }
 
-
-    protected function checkValidBase64($images)
+    /**
+     * check if image is valid base64
+     * @param string $image
+     */
+    protected function checkValidBase64($image)
     {
-        $extractString = explode(";base64,", $images);
+        $extractString = explode(";base64,", $image);
 
-        $images = isset($extractString[1]) ? $extractString[1] : $images;
+        $image = isset($extractString[1]) ? $extractString[1] : $image;
 
-        if (base64_encode(base64_decode($images, true)) !== $images){
+        if (base64_encode(base64_decode($image, true)) !== $image){
 
             throw new HttpException(Response::HTTP_BAD_REQUEST, 'invalid file input');
 
          }
 
-        return $images;
+        return $image;
     }
 
     /**
@@ -61,89 +66,85 @@ class ImageUploader
      */
     protected function UploadImages($images)
     {
-        $temp = [];
+        $filePaths = [];
 
-        if (is_string($images)) {
-
-            $images = $this->checkValidBase64($images);
-            $uploadedFile = base64_decode($images);
-            $temp[] = $this->storeTempImage($uploadedFile);
-
-        } else {
-
-            foreach($images as $image) {
-                $image = $this->checkValidBase64($image);
-                $uploadedFile = base64_decode($image);
-                $temp[] = $this->storeTempImage($uploadedFile);
-            }
-        }
-
-        $images = $this->validateImages($temp);
-
-        return $this->uploadImage($images);
-
-    }
-
-    /**
-     * validate images before saving
-     * @param array $images
-     */
-    public function validateImages($images)
-    {
+        $images = is_string($images) ? [$images] : $images;
 
         foreach($images as $image) {
 
-            $errors = $this->imageValidator->validate($image);
+            $image = $this->checkValidBase64($image);
 
-            if (count($errors) > 0) {
-                throw new HttpException(Response::HTTP_BAD_REQUEST, $errors[0]->getMessage());
+            $uploadedFile = base64_decode($image);
+
+            $tempFile = $this->storeTempImage($uploadedFile);
+
+            $errors = $this->imageValidator->validate($tempFile);
+
+            if (count($errors)) {
+                $this->unlinkImages($filePaths);
+
+                throw new HttpException(Response::HTTP_UNSUPPORTED_MEDIA_TYPE, $errors[0]->getMessage());
             }
+
+            $filePaths[] = $this->uploadImage($tempFile);
 
         }
 
-        return $images;
+        return $filePaths;
 
     }
 
     /**
+     * unlink uploaded images due to validation error
+     * @param array $images
+     */
+    public function unlinkImages($filePaths)
+    {
+        if (!count($filePaths)) {
+            return;
+        }
+
+        array_walk($filePaths, function($filePath) {
+                unlink($filePath['file_path']);
+        });
+
+    }
+
+    /**
+     * store temp image
      * @param $decodedImage
      * @return FileObject
      */
     protected function storeTempImage($decodedImage)
     {
         $tmpPath = sys_get_temp_dir().'/sf_upload'.uniqid();
-
         file_put_contents($tmpPath, $decodedImage);
+
         return new FileObject($tmpPath);
     }
 
     /**
+     * upload image to server
      * @param array $images
      * @return array $image
      */
-    protected function uploadImage($images)
+    protected function uploadImage($image)
     {
-        $imagePath = [];
+        $destination = $this->uploadsPath.'/images';
 
-        foreach ($images as $image) {
-            $destination = $this->uploadsPath.'/images';
+        $originalFilename = pathinfo($image->getFilename(), PATHINFO_FILENAME);
 
-            $originalFilename = pathinfo($image->getFilename(), PATHINFO_FILENAME);
+        $newFilename = Urlizer::urlize($originalFilename).'-'.uniqid().'.'.$image->guessExtension();
 
-            $newFilename = Urlizer::urlize($originalFilename).'-'.uniqid().'.'.$image->guessExtension();
+        $image->move(
+            $destination,
+            $newFilename
+        );
 
-            $image->move(
-                $destination,
-                $newFilename
-            );
-
-            $imagePath[] = [
-                            'file_name' => $newFilename,
-                            'file_path' => "$destination/$newFilename"
-                        ];
-        }
-
-        return $imagePath;
+        return  [
+                'file_name' => $newFilename,
+                'file_path' => "$destination/$newFilename"
+                ];
 
     }
 

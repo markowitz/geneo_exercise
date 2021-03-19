@@ -330,7 +330,7 @@ class PostTest extends BaseTestBundle
 
         $userFollow = $this->authorize();
 
-        $this->client->request('POST', "following/{$user->getId()}",
+        $this->client->request('POST', "follow/{$user->getId()}",
                 [],
                 [],
                 $userFollow
@@ -506,7 +506,7 @@ class PostTest extends BaseTestBundle
 
         $follower = $this->authorize();
 
-        $this->client->request('POST', "following/{$user->getId()}",
+        $this->client->request('POST', "follow/{$user->getId()}",
                 [],
                 [],
                 $follower

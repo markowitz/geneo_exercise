@@ -35,17 +35,16 @@ class UserController extends AbstractController
         $this->userRepo = $userRepo;
     }
 
-    /**
-     * @Route("/api/user/posts")
+     /**
+     * @Route("/api/admin/user/{id}", name="admin_delete_user", methods={"DELETE"})
      */
-    public function fetchUserPendingPosts()
+    public function delete(User $user)
     {
-        $user = $this->getUser();
-        $posts = $this->postRepo->fetchUserPendingPosts($user);
-        $posts = $this->postTransformer->transformFromObjects($posts);
+        $this->denyAccessUnlessGranted(User::ADMIN);
 
-        return $this->json([
-            'data' => $posts
-        ], Response::HTTP_OK);
+        $this->userRepo->delete($user);
+
+        return $this->json(null, Response::HTTP_NO_CONTENT);
+
     }
 }

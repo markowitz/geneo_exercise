@@ -21,20 +21,27 @@ class FollowingController extends AbstractController
     {
         $this->userRepo = $userRepo;
     }
+
+
     /**
-     * @Route("/api/following/{id}", name="api_following")
+     * @Route("/api/follow/{id}", name="api_follow")
      */
-    public function follow($id)
+    public function follow(User $user)
     {
-        $user = $this->userRepo->find($id);
-
-        if (!$user) {
-            return $this->json([
-                'message' => 'User not found'
-            ], Response::HTTP_NOT_FOUND);
-        }
-
         $this->userRepo->addFollowing($this->getUser(), $user);
+
+        return $this->json([
+            'message' => 'user followed'
+        ], Response::HTTP_OK);
+    }
+
+    /**
+     * @Route("/api/unfollow/{id}", name="api_unfollow")
+     */
+    public function unfollow(User $user)
+    {
+
+        $this->userRepo->removeFollower($this->getUser(), $user);
 
         return $this->json([
             'message' => 'user followed'

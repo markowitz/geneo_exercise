@@ -79,6 +79,19 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $this->_em->flush();
     }
 
+     /**
+     * used for a user to unfollow a user
+     * @param Object $authUser
+     * @param Object $user
+     */
+    public function removeFollower(Object $authUser, Object $user)
+    {
+        $authUser->removeFollower($user);
+
+        $this->_em->persist($authUser);
+        $this->_em->flush();
+    }
+
     /**
      * delete user
      * @param User $user

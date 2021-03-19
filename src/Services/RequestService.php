@@ -18,6 +18,7 @@ class RequestService
     }
 
     /**
+     * map the request to class DTO
      * @param Request $request
      * @param Object $className
      * @return Object $dto

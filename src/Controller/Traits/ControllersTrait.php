@@ -24,6 +24,7 @@ trait ControllersTrait
     }
 
     /**
+     * Format Validation errors
      * @param Symfony\Component\Validator\ConstraintViolationList $errors
      * @return array $errorRepsponse
      */
