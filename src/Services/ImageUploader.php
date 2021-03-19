@@ -29,8 +29,9 @@ class ImageUploader
     }
 
     /**
-     * @param {string | UploadedFile} $images
-     *
+     * handles the file upload
+     * @param string|array $images
+     * @return array $filePaths
      */
     public function handleUpload($images)
     {
@@ -43,6 +44,7 @@ class ImageUploader
     /**
      * check if image is valid base64
      * @param string $image
+     * @return $image
      */
     protected function checkValidBase64($image)
     {
