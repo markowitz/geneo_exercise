@@ -41,7 +41,7 @@ class PostRequest
     public $slug;
 
     /**
-     * @Assert\Type(type={"bool", "integer"})
+     * @Assert\Choice(0, 1)
      */
     public $approved;
 
