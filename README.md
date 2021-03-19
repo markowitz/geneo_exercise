@@ -36,32 +36,8 @@
 
 ## Routes
 
-  - POST ```/api/login_check``` to login
-       
-  - POST ```/api/register``` to create a new user 
-      
-  - POST ```/api/refresh/token``` to refresh login token
-       
+https://documenter.getpostman.com/view/3599318/Tz5v2vM4
 
-  - POST ```/api/post``` to create post
-  - GET ```/api/admin/pending-posts``` to fetch pending posts
-  - POST ```/api/admin/post/{id}/approval``` to approve 
-  
-
-  - DELETE ```/api/post/{id}``` to delete post
-
-  - POST ```api/post/{id}/edit``` to edit post
-       
-   - GET ```/api/post/{slug}``` show single post
-   - POST ```/api/post/{id}/comment ``` post comment 
-        
-   - POST ```/api/follow/{id} ``` endpoint to follow user
-   - POST ```/api/unfollow/{id} ``` endpoint to unfollow user
-   - GET ```/api/user/posts ``` show users posts
-   - DELETE ```/api/admin/user/{id}``` delete user
-   - POST ```/api/admin/post/{id}/approval ``` approve post
-          
-  - GET ``` /api/posts``` fetches all approved posts
   
   ## Note
   
