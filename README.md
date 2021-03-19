@@ -26,7 +26,7 @@
   - bash into the docker container ```docker exec -it geneo.app bash```
   - run ``` composer install```
   - run ```php bin/console doctrine:migrations:migrate``` to run migration and add ```--env=test``` flag for test migration
-  - if you have issues with migrating the env test, run ```php bin/console doctrine:database:create --env=test```
+  - if you have issues with migrating the env test, run ```php bin/console doctrine:database:create --env=test``` to create the test db
   - ```php bin/console doctrine:fixtures:load``` to load data fixtures add the test env flag to load for test db
   - run ``` bin/console lexik:jwt:generate-keypair``` to generate jwt key
   - an admin account is setup already with detail
