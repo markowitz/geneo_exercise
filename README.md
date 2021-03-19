@@ -140,7 +140,7 @@
                 "approved": 1
             }'
             
-         ```
+         
           
   - GET ``` /api/posts``` fetches all approved posts
   
