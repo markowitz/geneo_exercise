@@ -234,7 +234,7 @@ class PostController extends AbstractController
 
     /**
      * fetch all auth user pending posts
-     * @Route("/api/user/posts")
+     * @Route("/api/user/pending-posts")
      */
     public function fetchUserPendingPosts()
     {
