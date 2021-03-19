@@ -53,7 +53,7 @@ class PostRepository extends ServiceEntityRepository
     }
 
      /**
-     * Get  Posts by author  and other authors following
+     * Get  Posts by author  and others the author follows
      * @param Object $user
      * @return Post [] returns an array of post objects
      */
