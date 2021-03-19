@@ -20,6 +20,7 @@ class ImageValidator
     }
 
     /**
+     * validates the image
      * @param UploadedFile $uploadedFile
      * @return ConstraintViolationList $violations
      */
