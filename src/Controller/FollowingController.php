@@ -40,6 +40,13 @@ class FollowingController extends AbstractController
      */
     public function unfollow(User $user)
     {
+        $checkUser = $this->getUser()->getFollowing()->contains($user);
+
+        if (!$checkUser) {
+            return $this->json([
+                'message' => 'you do not follow this user'
+            ], Response::HTTP_BAD_REQUEST);
+        }
 
         $this->userRepo->removeFollower($this->getUser(), $user);
 
