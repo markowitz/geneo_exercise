@@ -51,7 +51,7 @@ class FollowingController extends AbstractController
         $this->userRepo->removeFollower($this->getUser(), $user);
 
         return $this->json([
-            'message' => 'user followed'
+            'message' => 'user unfollowed'
         ], Response::HTTP_OK);
     }
 }
