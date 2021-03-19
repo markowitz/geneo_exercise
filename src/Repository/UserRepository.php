@@ -84,9 +84,9 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
      * @param Object $authUser
      * @param Object $user
      */
-    public function removeFollower(Object $authUser, Object $user)
+    public function removeFollowing(Object $authUser, Object $user)
     {
-        $authUser->removeFollower($user);
+        $authUser->removeFollowing($user);
 
         $this->_em->persist($authUser);
         $this->_em->flush();

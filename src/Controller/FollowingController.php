@@ -48,7 +48,8 @@ class FollowingController extends AbstractController
             ], Response::HTTP_BAD_REQUEST);
         }
 
-        $this->userRepo->removeFollower($this->getUser(), $user);
+        $this->userRepo->removeFollowing($this->getUser(), $user);
+
 
         return $this->json([
             'message' => 'user unfollowed'
