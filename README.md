@@ -148,4 +148,6 @@
   ## Note
   
    - Test Coverage is 70% 
+   - File uploads are inside the ``` public/uploads ``` directory
+   
  
