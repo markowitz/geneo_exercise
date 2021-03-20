@@ -154,16 +154,8 @@ class PostController extends AbstractController
      * view single post
      * @Route("/api/post/{slug}", name="fetch_post", methods={"GET"})
      */
-    public function show(String $slug)
+    public function show(Post $post)
     {
-        $post = $this->postRepo->findOneBy(['slug' => $slug]);
-
-        if (!$post) {
-
-            return $this->json([
-                'message' => 'Not found'
-            ], Response::HTTP_NOT_FOUND);
-        }
 
         $this->denyAccessUnlessGranted('view', $post);
 
