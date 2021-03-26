@@ -13,6 +13,8 @@ class PostCommentRequest
      */
     public $comment;
 
-    public $user;
+    public $author;
+
+    public $date;
 
 }

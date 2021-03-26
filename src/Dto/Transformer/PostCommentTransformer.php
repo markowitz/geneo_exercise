@@ -20,7 +20,8 @@ class PostCommentTransformer extends AbstractTransformer
         $dto = new PostCommentRequest();
 
         $dto->comment = $postComment->getComment();
-        $dto->user    = $postComment->getUser()->getName();
+        $dto->author    = $postComment->getUser()->getName();
+        $dto->date     = $postComment->getCreatedAt();
 
         return $dto;
     }
