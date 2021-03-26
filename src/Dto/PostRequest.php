@@ -45,6 +45,8 @@ class PostRequest
      */
     public $approved;
 
+    public $comments;
+
     public $createdAt;
 
     public $updatedAt;
